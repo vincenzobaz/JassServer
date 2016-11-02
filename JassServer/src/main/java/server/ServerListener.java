@@ -13,6 +13,9 @@ import model.Player;
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 class ServerListener implements ChildEventListener {
     private Map<String, Match> matches;
@@ -58,11 +61,18 @@ class ServerListener implements ChildEventListener {
             Player lastArrived = newPlayers.get(oldPlayers.size());
             notifyJoinMatch(lastArrived.getID().toString(), oldMatch.getMatchID(), oldPlayers);
         }
-        oldPlayers = new ArrayList<>(oldPlayers);
+
         if (newPlayers.size() + 1 == oldPlayers.size()) {
-            oldPlayers.removeAll(newPlayers);
-            notifyLeaveMatch(oldPlayers.get(0).getID().toString(), matchId, newPlayers);
+            List<String> oldScipers = collectScipers(oldPlayers);
+            List<String> newScipers = collectScipers(newPlayers);
+            oldScipers.removeAll(newScipers);
+            notifyLeaveMatch(oldScipers.get(0), matchId, newPlayers);
         }
+    }
+
+    private List<String> collectScipers(List<Player> players) {
+        List<String> res = new ArrayList<>(players.size());
+        return players.stream().map(p -> p.getID().toString()).collect(Collectors.toList());
     }
 
     private void notifyLeaveMatch(String traitor, String matchId, List<Player> remaining) {
