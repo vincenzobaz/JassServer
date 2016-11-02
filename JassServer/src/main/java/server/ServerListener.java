@@ -58,6 +58,7 @@ class ServerListener implements ChildEventListener {
             Player lastArrived = newPlayers.get(oldPlayers.size());
             notifyJoinMatch(lastArrived.getID().toString(), oldMatch.getMatchID(), oldPlayers);
         }
+        oldPlayers = new ArrayList<>(oldPlayers);
         if (newPlayers.size() + 1 == oldPlayers.size()) {
             oldPlayers.removeAll(newPlayers);
             notifyLeaveMatch(oldPlayers.get(0).getID().toString(), matchId, newPlayers);
