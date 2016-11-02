@@ -6,6 +6,8 @@ services:
       - 80:80
     depends_on:
       - server
+    volumes:
+      - /var/log/nginx/
 
   server:
     build: JassServer/
@@ -14,7 +16,7 @@ services:
     depends_on:
       - redis
     volumes:
-      /JassServer/logs/
+      - /JassServer/logs/
 
   redis:
     image: redis
