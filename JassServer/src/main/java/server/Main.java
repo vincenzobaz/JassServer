@@ -54,7 +54,7 @@ public class Main {
             JsonObject body = gson.fromJson(req.body(), JsonObject.class);
             String sciper = body.get("sciper").getAsString();
             String token = body.get("token").getAsString();
-            logger.info("Registered player " + " with token " + token);
+            logger.info("Registered player " + sciper + " with token " + token);
             jedis.set(sciper, token);
             return "registered";
         });
