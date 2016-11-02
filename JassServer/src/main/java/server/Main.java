@@ -77,7 +77,7 @@ public class Main {
             msg.addProperty("to", jedis.get(sciper));
             msg.add("data", data);
 
-            Unirest.post(FCM_URL).body(gson.toJson(msg));
+            logger.info(Unirest.post(FCM_URL).body(gson.toJson(msg)).asString().getBody());
 
             return "invited";
         });
