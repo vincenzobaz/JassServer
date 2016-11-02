@@ -1,6 +1,5 @@
 package server;
 
-import com.google.api.client.util.Data;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.FirebaseDatabase;
@@ -9,6 +8,9 @@ import com.google.gson.JsonObject;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import redis.clients.jedis.Jedis;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,6 +24,8 @@ public class Main {
     static String REDIS_URL;
 
     public static void main(String[] args) throws FileNotFoundException, UnirestException {
+        Logger logger = LoggerFactory.getLogger(Main.class);
+
         FCM_KEY = "key=" + System.getenv("FCM_KEY");
         FCM_URL = System.getenv("FCM_URL");
         REDIS_URL = System.getenv("REDIS_HOST");
@@ -50,6 +54,7 @@ public class Main {
             JsonObject body = gson.fromJson(req.body(), JsonObject.class);
             String sciper = body.get("sciper").getAsString();
             String token = body.get("token").getAsString();
+            logger.info("Registered player " + " with token " + token);
             jedis.set(sciper, token);
             return "registered";
         });
@@ -59,6 +64,7 @@ public class Main {
             String sciper = jBody.get("sciper").getAsString();
             String matchId = jBody.get("matchId").getAsString();
             String by = jBody.get("by").getAsString();
+            logger.info("Player " + by + " invited " + sciper + " to " + matchId);
 
             JsonObject data = new JsonObject();
             data.addProperty("type", "invite");
