@@ -22,9 +22,9 @@ public class Main {
     static String FCM_URL;
     static boolean DELETE_EXPIRED;
     static String REDIS_URL;
+    static Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws FileNotFoundException, UnirestException {
-        Logger logger = LoggerFactory.getLogger(Main.class);
 
         FCM_KEY = "key=" + System.getenv("FCM_KEY");
         FCM_URL = System.getenv("FCM_URL");

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import model.Match;
 import model.Player;
 import redis.clients.jedis.Jedis;
@@ -34,10 +35,16 @@ public class ExpirationNotifier extends TimerTask {
         data.addProperty("type", "matchexpired");
         data.addProperty("title", "A match you joined expired!");
         data.addProperty("text", "Tap to join another one!");
+        data.addProperty("matchId", m.getMatchID());
 
         JsonObject msg = new JsonObject();
         msg.add("data", data);
         msg.add("registration_ids", tokens);
-        Unirest.post(Main.FCM_URL).body(gson.toJson(msg));
+        try {
+            Main.logger.info("Match " + m.getMatchID() + " has expired");
+            Main.logger.info(Unirest.post(Main.FCM_URL).body(gson.toJson(msg)).asString().getBody());
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
     }
 }
