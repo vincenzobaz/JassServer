@@ -9,6 +9,8 @@ services:
 
   server:
     build: JassServer/
+    env_file:
+      - ./prod.env
     depends_on:
       - redis
 
