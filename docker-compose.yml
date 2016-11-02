@@ -13,6 +13,8 @@ services:
       - ./prod.env
     depends_on:
       - redis
+    volumes:
+      /JassServer/logs/
 
   redis:
     image: redis
