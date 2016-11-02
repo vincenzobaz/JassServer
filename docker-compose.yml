@@ -1,0 +1,17 @@
+version: "2"
+services:
+  nginx:
+    build: nginx/
+    ports:
+      - 80:80
+    depends_on:
+      - server
+
+  server:
+    build: JassServer/
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    command: redis-server --appendonly yes
