@@ -7,4 +7,4 @@ RUN ./gradlew build && cp build/libs/jasserver.jar .
 
 VOLUME logs/
 
-RUN java -jar jasserver.jar
+CMD java -jar jasserver.jar
