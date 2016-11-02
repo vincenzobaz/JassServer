@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import model.Match;
 import model.Player;
 import redis.clients.jedis.Jedis;
@@ -74,7 +75,12 @@ class ServerListener implements ChildEventListener {
         JsonObject msg = new JsonObject();
         msg.add("data", data);
         msg.add("registration_ids", getIds(remaining));
-        Unirest.post(Main.FCM_URL).body(gson.toJson(msg));
+        Main.logger.info("Player " + traitor + " left match " + matchId);
+        try {
+            Main.logger.info(Unirest.post(Main.FCM_URL).body(gson.toJson(msg)).asString().getBody());
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
     }
 
     private void notifyJoinMatch(String sciper, String matchID, List<Player> oldPlayers) {
@@ -88,7 +94,12 @@ class ServerListener implements ChildEventListener {
         JsonObject msg = new JsonObject();
         msg.add("data", data);
         msg.add("registration_ids", getIds(oldPlayers));
-        Unirest.post(Main.FCM_URL).body(gson.toJson(msg));
+        Main.logger.info("Player " + sciper + " has joined match " + matchID);
+        try {
+            Main.logger.info(Unirest.post(Main.FCM_URL).body(gson.toJson(msg)).asString().getBody());
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
     }
 
     private void notifyFull(String id, List<Player> players) {
@@ -101,7 +112,12 @@ class ServerListener implements ChildEventListener {
         JsonObject msg = new JsonObject();
         msg.add("registration_ids", getIds(players));
         msg.add("data", data);
-        Unirest.post(Main.FCM_URL).body(gson.toJson(msg));
+        Main.logger.info("Match " + id + " is full");
+        try {
+            Main.logger.info(Unirest.post(Main.FCM_URL).body(gson.toJson(msg)).asString().getBody());
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
     }
 
     private JsonArray getIds(List<Player> players) {
