@@ -56,13 +56,10 @@ class ServerListener implements ChildEventListener {
 
         if (newPlayers.size() == newMatch.getMaxPlayerNumber()) {
             notifyFull(matchId, newPlayers);
-        }
-        if (newPlayers.size() == oldPlayers.size() + 1) {
+        } else if (newPlayers.size() == oldPlayers.size() + 1) {
             Player lastArrived = newPlayers.get(oldPlayers.size());
             notifyJoinMatch(lastArrived.getID().toString(), oldMatch.getMatchID(), oldPlayers);
-        }
-
-        if (newPlayers.size() + 1 == oldPlayers.size()) {
+        } else if (newPlayers.size() + 1 == oldPlayers.size()) {
             List<String> oldScipers = collectScipers(oldPlayers);
             List<String> newScipers = collectScipers(newPlayers);
             oldScipers.removeAll(newScipers);
