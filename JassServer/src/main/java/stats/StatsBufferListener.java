@@ -1,6 +1,7 @@
 package stats;
 
 import model.Player;
+import server.Main;
 
 import com.google.firebase.database.*;
 
@@ -15,6 +16,7 @@ public class StatsBufferListener implements ChildEventListener {
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
         StatsUpdate matchResult = dataSnapshot.getValue(StatsUpdate.class);
+        Main.logger.info("Received StatsUpdate for match " + matchResult.getMatchId());
         refBuffer.child(dataSnapshot.getKey()).removeValue();
         List<Player.PlayerID> players = new ArrayList<>();
         players.addAll(matchResult.getWinners());
@@ -45,6 +47,7 @@ public class StatsBufferListener implements ChildEventListener {
     }
 
     private void retrieveAndUpdateStats(Player.PlayerID id, StatsUpdate matchResult) {
+        Main.logger.info("Updating stats of player " + id.toString() + " after match " + matchResult.getMatchId());
         refStats.child(id.toString())
                 .addListenerForSingleValueEvent(new StatsUpdater(matchResult));
     }

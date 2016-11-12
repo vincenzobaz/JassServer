@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-class ServerListener implements ChildEventListener {
+class MatchListener implements ChildEventListener {
     private Map<String, Match> matches;
     private final Timer timer;
     private final Gson gson;
     private Jedis jedis;
 
-    ServerListener() {
+    MatchListener() {
         Unirest.setDefaultHeader("Content-Type", "application/json");
         Unirest.setDefaultHeader("Authorization", Main.FCM_KEY);
         this.jedis = new Jedis("redis");

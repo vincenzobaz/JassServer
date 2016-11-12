@@ -13,7 +13,7 @@ import java.util.*;
  *         This class serves as a container for the statistics concerning one {@link model.Player}
  *         player. The tracked information are class fields and are documented below.
  */
-public class UserStats {
+class UserStats {
     // The unique identifier of the player.
     private Player.PlayerID playerId;
     // How many matches he played.
@@ -40,7 +40,7 @@ public class UserStats {
      *
      * @param id
      */
-    public UserStats(Player.PlayerID id) {
+    protected UserStats(Player.PlayerID id) {
         this.playerId = id;
     }
 
@@ -52,7 +52,7 @@ public class UserStats {
     }
 
     /* Getters */
-    public Player.PlayerID getPlayerId() {
+    Player.PlayerID getPlayerId() {
         return playerId;
     }
 

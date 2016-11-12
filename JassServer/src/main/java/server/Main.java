@@ -23,7 +23,7 @@ public class Main {
     static String FCM_URL;
     static boolean DELETE_EXPIRED;
     static String REDIS_URL;
-    static Logger logger = LoggerFactory.getLogger(Main.class);
+    public static Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws FileNotFoundException, UnirestException {
 
@@ -38,8 +38,8 @@ public class Main {
                 .setDatabaseUrl(Database)
                 .build();
         FirebaseApp.initializeApp(options);
-        ServerListener s = new ServerListener();
-        FirebaseDatabase.getInstance().getReference().child("matches").addChildEventListener(s);
+        FirebaseDatabase.getInstance().getReference().child("matches")
+                .addChildEventListener(new MatchListener());
         System.out.println("Started matches listener");
 
 

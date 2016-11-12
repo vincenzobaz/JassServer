@@ -14,7 +14,7 @@ import java.util.List;
  *         of the FirebaseDatabase. It a small object containing information about the finished that will be
  *         used to update the user statistics by the server.
  */
-public class StatsUpdate {
+class StatsUpdate {
     private long timestamp;
     private List<Player.PlayerID> winners;
     private List<Player.PlayerID> losers;
