@@ -150,6 +150,9 @@ class UserStats {
         if (playedByDate.peekLast().getKey() != updateDate) {
             playedByDate.addLast(new Tuple2<>(updateDate, 0));
             wonByDate.addLast(new Tuple2<>(updateDate, 0));
+            if (rankByDate.isEmpty()) {
+                rankByDate.addLast(new Tuple2<Long, Rank>(updateDate, new Rank(0)));
+            }
             rankByDate.addLast(new Tuple2<>(updateDate, rankByDate.getLast().getValue()));
         }
     }
