@@ -122,6 +122,11 @@ public class Player {
 
         public PlayerID() {
         }
+        // TODO: implement equals and hascode
+
+        public String toString() {
+            return Long.toString(getID());
+        }
 
     }
 
