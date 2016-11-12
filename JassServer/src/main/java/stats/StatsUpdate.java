@@ -3,6 +3,7 @@ package stats;
 import model.Match;
 import model.Player;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,16 +35,16 @@ public class StatsUpdate {
      *                  match.
      * @param matchId   The unique identifier of the match.
      */
-    public StatsUpdate(long timestamp,
-                       List<Player.PlayerID> winners,
-                       List<Player.PlayerID> losers,
-                       int scoreWin,
-                       int scoreLost,
-                       Match.GameVariant variant,
-                       String matchId) {
+    private StatsUpdate(long timestamp,
+                        List<Player.PlayerID> winners,
+                        List<Player.PlayerID> losers,
+                        int scoreWin,
+                        int scoreLost,
+                        Match.GameVariant variant,
+                        String matchId) {
         this.timestamp = timestamp;
-        this.winners = winners;
-        this.losers = losers;
+        this.winners = Collections.unmodifiableList(winners);
+        this.losers = Collections.unmodifiableList(losers);
         this.scoreWin = scoreWin;
         this.scoreLost = scoreLost;
         this.variant = variant;
@@ -62,11 +63,11 @@ public class StatsUpdate {
     }
 
     public List<Player.PlayerID> getWinners() {
-        return Collections.unmodifiableList(winners);
+        return winners;
     }
 
     public List<Player.PlayerID> getLosers() {
-        return Collections.unmodifiableList(losers);
+        return losers;
     }
 
     public int getScoreWin() {
@@ -87,6 +88,7 @@ public class StatsUpdate {
 
     /**
      * Builder class for StatsUpdate.
+     * Only way to instantiate StatsUpdate
      */
     public static class Builder {
         private long timestamp;
