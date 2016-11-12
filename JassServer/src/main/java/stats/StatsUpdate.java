@@ -3,7 +3,6 @@ package stats;
 import model.Match;
 import model.Player;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.List;
  *         of the FirebaseDatabase. It a small object containing information about the finished that will be
  *         used to update the user statistics by the server.
  */
-class StatsUpdate {
+public class StatsUpdate {
     private long timestamp;
     private List<Player.PlayerID> winners;
     private List<Player.PlayerID> losers;
@@ -31,17 +30,16 @@ class StatsUpdate {
      * @param losers    The list of the IDs of the losing team.
      * @param scoreWin  The score of the winners.
      * @param scoreLost The score of the losers.
-     * @param variant   The {@link model.Match.GameVariant} variant of the
-     *                  match.
+     * @param variant   The variant of the match.
      * @param matchId   The unique identifier of the match.
      */
     private StatsUpdate(long timestamp,
-                        List<Player.PlayerID> winners,
-                        List<Player.PlayerID> losers,
-                        int scoreWin,
-                        int scoreLost,
-                        Match.GameVariant variant,
-                        String matchId) {
+                       List<Player.PlayerID> winners,
+                       List<Player.PlayerID> losers,
+                       int scoreWin,
+                       int scoreLost,
+                       Match.GameVariant variant,
+                       String matchId) {
         this.timestamp = timestamp;
         this.winners = winners;
         this.losers = losers;
@@ -88,7 +86,6 @@ class StatsUpdate {
 
     /**
      * Builder class for StatsUpdate.
-     * Only way to instantiate StatsUpdate
      */
     public static class Builder {
         private long timestamp;
@@ -104,36 +101,43 @@ class StatsUpdate {
             losers = new LinkedList<>();
         }
 
-        public void addLosers(Player.PlayerID... losers) {
+        public Builder addLosers(Player.PlayerID... losers) {
             for (Player.PlayerID id : losers) {
                 this.losers.add(id);
             }
+            return this;
         }
 
-        public void addWinners(Player.PlayerID... winners) {
+        public Builder addWinners(Player.PlayerID... winners) {
             for (Player.PlayerID id : winners) {
                 this.winners.add(id);
             }
+            return this;
         }
 
-        public void setTimestamp(long timestamp) {
+        public Builder setTimestamp(long timestamp) {
             this.timestamp = timestamp;
+            return this;
         }
 
-        public void setWinScore(int winScore) {
+        public Builder setWinScore(int winScore) {
             this.scoreWin = winScore;
+            return this;
         }
 
-        public void setLoseScore(int loseScore) {
+        public Builder setLoseScore(int loseScore) {
             this.scoreLost = loseScore;
+            return this;
         }
 
-        public void setGameVariant(Match.GameVariant v) {
+        public Builder setGameVariant(Match.GameVariant v) {
             this.variant = v;
+            return this;
         }
 
-        public void setMatchId(String matchId) {
+        public Builder setMatchId(String matchId) {
             this.matchId = matchId;
+            return this;
         }
 
         public StatsUpdate build() {

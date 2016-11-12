@@ -10,10 +10,10 @@ import java.util.*;
 /**
  * @author vincenzobaz
  *         <p>
- *         This class serves as a container for the statistics concerning one {@link model.Player}
+ *         This class serves as a container for the statistics concerning one
  *         player. The tracked information are class fields and are documented below.
  */
-class UserStats {
+public class UserStats {
     // The unique identifier of the player.
     private Player.PlayerID playerId;
     // How many matches he played.
@@ -40,7 +40,7 @@ class UserStats {
      *
      * @param id
      */
-    protected UserStats(Player.PlayerID id) {
+    public UserStats(Player.PlayerID id) {
         this.playerId = id;
     }
 
@@ -52,7 +52,7 @@ class UserStats {
     }
 
     /* Getters */
-    Player.PlayerID getPlayerId() {
+    public Player.PlayerID getPlayerId() {
         return playerId;
     }
 
@@ -94,7 +94,7 @@ class UserStats {
      *
      * @param update The results of a concluded match
      */
-    protected void update(StatsUpdate update) {
+    protected UserStats update(StatsUpdate update) {
         prepareLastBuckets(update.getTimestamp());
 
         playedMatches += 1;
@@ -105,17 +105,17 @@ class UserStats {
             wonByDate.peekLast().setValue(wonByDate.getLast().getValue() + 1);
         }
         List<Player.PlayerID> team = isWinner ? update.getWinners() : update.getLosers();
-        List<Player.PlayerID> teamMates = new LinkedList<>(team);
-        teamMates.remove(playerId);
         for (Player.PlayerID id : team) {
-            if (partners.containsKey(id))
+            if (!playerId.equals(id)) {
                 partners.put(id, getOrDefaultMap(partners, id, 0) + 1);
-            if (isWinner) {
-                wonWith.put(id, getOrDefaultMap(wonWith, id, 0) + 1);
+                if (isWinner) {
+                    wonWith.put(id, getOrDefaultMap(wonWith, id, 0) + 1);
+                }
             }
         }
 
         variants.put(update.getVariant(), getOrDefaultMap(variants, update.getVariant(), 0) + 1);
+        return this;
     }
 
     /**
@@ -132,7 +132,7 @@ class UserStats {
     /**
      * Updates the rank object of the day specified in timestamp according to new information.
      *
-     * @param rankCalculator A Strategy objects that computes the new rank using the UserStats object.
+     * @param rankCalculator A Strategy object that computes the new rank using the UserStats object.
      */
     protected void updateRank(RankCalculator rankCalculator) {
         Rank newRank = rankCalculator.computeNewRank();
@@ -147,13 +147,14 @@ class UserStats {
      */
     private void prepareLastBuckets(Long time) {
         long updateDate = getDay(time);
-        if (playedByDate.peekLast().getKey() != updateDate) {
+        if (playedByDate.peekLast() == null || playedByDate.peekLast().getKey() != updateDate) {
             playedByDate.addLast(new Tuple2<>(updateDate, 0));
             wonByDate.addLast(new Tuple2<>(updateDate, 0));
             if (rankByDate.isEmpty()) {
                 rankByDate.addLast(new Tuple2<Long, Rank>(updateDate, new Rank(0)));
+            } else {
+                rankByDate.addLast(new Tuple2<>(updateDate, rankByDate.getLast().getValue()));
             }
-            rankByDate.addLast(new Tuple2<>(updateDate, rankByDate.getLast().getValue()));
         }
     }
 

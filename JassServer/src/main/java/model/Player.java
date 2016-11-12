@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Objects;
+
 /**
  * Class representing a player, identified by his/her name, sciper ID,
  * and rank in the scoreboard.
@@ -89,6 +91,25 @@ public class Player {
         return firstName + ' ' + lastName;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        } else if (other == null || other.getClass() != this.getClass()) {
+            return false;
+        }
+
+        Player otherPlayer = (Player) other;
+        return this.id.equals(otherPlayer.id)
+                && this.lastName.equals(otherPlayer.lastName)
+                && this.firstName.equals(otherPlayer.firstName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, lastName, firstName);
+    }
+
     /**
      * Sets the rank of the player.
      *
@@ -122,10 +143,20 @@ public class Player {
 
         public PlayerID() {
         }
-        // TODO: implement equals and hascode
 
-        public String toString() {
-            return Long.toString(getID());
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) {
+                return true;
+            } else if (other == null || other.getClass() != this.getClass()) {
+                return false;
+            }
+            return this.getID() == ((PlayerID) other).getID();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.getID());
         }
 
     }

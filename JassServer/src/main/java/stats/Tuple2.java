@@ -18,7 +18,7 @@ class Tuple2<T, V> {
      * @param key
      * @param value
      */
-    Tuple2(T key, V value) {
+    public Tuple2(T key, V value) {
         this.k = key;
         this.v = value;
     }
@@ -49,7 +49,7 @@ class Tuple2<T, V> {
      * @param newValue the new value of the tuple
      * @return the current object, for method chaining.
      */
-    Tuple2<T, V> setValue(V newValue) {
+    protected Tuple2<T, V> setValue(V newValue) {
         this.v = newValue;
         return this;
     }

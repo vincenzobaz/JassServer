@@ -1,5 +1,6 @@
 package model;
 
+import java.util.Objects;
 
 /**
  * Class that represents a rank in a competition system.
@@ -43,8 +44,24 @@ public class Rank implements Comparable<Rank> {
         return Integer.toString(rank);
     }
 
+    @Override
     public int compareTo(Rank o) {
         return ((Integer) rank).compareTo(o.rank);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        } else if (other == null || other.getClass() != this.getClass()) {
+            return false;
+        }
+        return this.getRank() == ((Rank) other).getRank();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getRank());
     }
 
     /**
