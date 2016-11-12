@@ -43,8 +43,8 @@ public class StatsUpdate {
                         Match.GameVariant variant,
                         String matchId) {
         this.timestamp = timestamp;
-        this.winners = Collections.unmodifiableList(winners);
-        this.losers = Collections.unmodifiableList(losers);
+        this.winners = winners;
+        this.losers = losers;
         this.scoreWin = scoreWin;
         this.scoreLost = scoreLost;
         this.variant = variant;
@@ -63,11 +63,11 @@ public class StatsUpdate {
     }
 
     public List<Player.PlayerID> getWinners() {
-        return winners;
+        return Collections.unmodifiableList(winners);
     }
 
     public List<Player.PlayerID> getLosers() {
-        return losers;
+        return Collections.unmodifiableList(losers);
     }
 
     public int getScoreWin() {
