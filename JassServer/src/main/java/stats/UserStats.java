@@ -1,6 +1,5 @@
 package stats;
 
-import model.Match;
 import model.Player;
 import model.Rank;
 
@@ -22,12 +21,14 @@ public class UserStats {
     private int wonMatches = 0;
 
     // Number of played matches by date (one counter per day).
-    private LinkedList<Tuple2<Long, Integer>> playedByDate = new LinkedList<>();
+    private List<Tuple2<Long, Integer>> playedByDate = new ArrayList<>();
     // Number of won matches by date (one counter per day).
-    private LinkedList<Tuple2<Long, Integer>> wonByDate = new LinkedList<>();
+    private List<Tuple2<Long, Integer>> wonByDate = new ArrayList<>();
     // The player rank by date (store the value each day to study progression).
-    private LinkedList<Tuple2<Long, Rank>> rankByDate = new LinkedList<>();
+    private List<Tuple2<Long, Rank>> rankByDate = new ArrayList<>();
 
+    // We have to use strings instead of real objects as Firebase does not support Maps with
+    // no string - keys
     // How many times different game variants have been played.
     private Map<String, Integer> variants = new HashMap<>();
     // How many matches have been as a partner of other players.
@@ -98,11 +99,12 @@ public class UserStats {
         prepareLastBuckets(update.getTimestamp());
 
         playedMatches += 1;
-        playedByDate.peekLast().setValue(playedByDate.getLast().getValue() + 1);
+        int lastIndex = playedByDate.size() - 1;
+        playedByDate.get(lastIndex).setValue(playedByDate.get(lastIndex).getValue() + 1);
         boolean isWinner = update.getWinners().contains(this.playerId);
         if (isWinner) {
             wonMatches += 1;
-            wonByDate.peekLast().setValue(wonByDate.getLast().getValue() + 1);
+            wonByDate.get(lastIndex).setValue(wonByDate.get(lastIndex).getValue() + 1);
         }
         List<Player.PlayerID> team = isWinner ? update.getWinners() : update.getLosers();
         for (Player.PlayerID id : team) {
@@ -136,7 +138,7 @@ public class UserStats {
      */
     protected void updateRank(RankCalculator rankCalculator) {
         Rank newRank = rankCalculator.computeNewRank();
-        rankByDate.getLast().setValue(newRank);
+        rankByDate.get(rankByDate.size() - 1).setValue(newRank);
     }
 
     /**
@@ -147,13 +149,14 @@ public class UserStats {
      */
     private void prepareLastBuckets(Long time) {
         long updateDate = getDay(time);
-        if (playedByDate.peekLast() == null || playedByDate.peekLast().getKey() != updateDate) {
-            playedByDate.addLast(new Tuple2<>(updateDate, 0));
-            wonByDate.addLast(new Tuple2<>(updateDate, 0));
+        int lastIndex = playedByDate.size() - 1;
+        if (playedByDate.isEmpty() || playedByDate.get(lastIndex).getKey() != updateDate) {
+            playedByDate.add(new Tuple2<>(updateDate, 0));
+            wonByDate.add(new Tuple2<>(updateDate, 0));
             if (rankByDate.isEmpty()) {
-                rankByDate.addLast(new Tuple2<Long, Rank>(updateDate, new Rank(0)));
+                rankByDate.add(new Tuple2<Long, Rank>(updateDate, new Rank(0)));
             } else {
-                rankByDate.addLast(new Tuple2<>(updateDate, rankByDate.getLast().getValue()));
+                rankByDate.add(new Tuple2<>(updateDate, rankByDate.get(lastIndex).getValue()));
             }
         }
     }
