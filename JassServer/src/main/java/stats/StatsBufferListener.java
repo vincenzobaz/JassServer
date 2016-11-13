@@ -11,8 +11,8 @@ import java.util.List;
 public class StatsBufferListener implements ChildEventListener {
     private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("stats").child("user");
     private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("stats").child("buffer");
+    private DatabaseReference refArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchArchive");
 
-    // TODO: Delete match upon reception? Store in private section of db?
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
         StatsUpdate matchResult = dataSnapshot.getValue(StatsUpdate.class);
@@ -24,6 +24,8 @@ public class StatsBufferListener implements ChildEventListener {
         for (Player.PlayerID id : players) {
             retrieveAndUpdateStats(id, matchResult);
         }
+        refArchive.child(matchResult.getMatchId()).setValue(matchResult);
+        refBuffer.child(dataSnapshot.getKey()).removeValue();
     }
 
     @Override
