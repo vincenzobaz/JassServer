@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StatsBufferListener implements ChildEventListener {
-    private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("Stats").child("UserStats");
-    private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("Stats").child("StatsBuffer");
+    private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("stats").child("user");
+    private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("stats").child("buffer");
 
     // TODO: Delete match upon reception? Store in private section of db?
     @Override
