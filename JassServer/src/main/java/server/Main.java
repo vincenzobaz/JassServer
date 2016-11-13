@@ -40,10 +40,6 @@ public class Main {
                 .build();
         FirebaseApp.initializeApp(options);
 
-        FirebaseDatabase.getInstance().getReference().child("players")
-                .addChildEventListener(new UserStatsInitializer());
-
-
         FirebaseDatabase.getInstance().getReference().child("matches")
                 .addChildEventListener(new MatchListener());
         System.out.println("Started matches listener");
