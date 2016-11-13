@@ -49,19 +49,26 @@ public class StatsBufferListener implements ChildEventListener {
     private void retrieveAndUpdateStats(Player.PlayerID id, StatsUpdate matchResult) {
         Main.logger.info("Updating stats of player " + id.toString() + " after match " + matchResult.getMatchId());
         refStats.child(id.toString())
-                .addListenerForSingleValueEvent(new StatsUpdater(matchResult));
+                .addListenerForSingleValueEvent(new StatsUpdater(id, matchResult));
     }
 
     private class StatsUpdater implements ValueEventListener {
         private StatsUpdate matchResult;
+        private Player.PlayerID id;
 
-        StatsUpdater(StatsUpdate matchResult) {
+        StatsUpdater(Player.PlayerID id, StatsUpdate matchResult) {
             this.matchResult = matchResult;
+            this.id = id;
         }
 
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            UserStats stats = dataSnapshot.getValue(UserStats.class);
+            UserStats stats = null;
+            if (dataSnapshot.exists()) {
+                stats = dataSnapshot.getValue(UserStats.class);
+            } else {
+                stats = new UserStats(id);
+            }
             stats.update(matchResult);
             stats.updateRank(new NaiveCalculator(stats));
             refStats.child(dataSnapshot.getKey())
