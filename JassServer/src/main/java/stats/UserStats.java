@@ -29,11 +29,11 @@ public class UserStats {
     private LinkedList<Tuple2<Long, Rank>> rankByDate = new LinkedList<>();
 
     // How many times different game variants have been played.
-    private Map<Match.GameVariant, Integer> variants = new HashMap<>();
+    private Map<String, Integer> variants = new HashMap<>();
     // How many matches have been as a partner of other players.
-    private Map<Player.PlayerID, Integer> partners = new HashMap<>();
+    private Map<String, Integer> partners = new HashMap<>();
     // How many matches have been won as a partner of other players.
-    private Map<Player.PlayerID, Integer> wonWith = new HashMap<>();
+    private Map<String, Integer> wonWith = new HashMap<>();
 
     /**
      * Constructor, only start with user id.
@@ -76,15 +76,15 @@ public class UserStats {
         return Collections.unmodifiableList(rankByDate);
     }
 
-    public Map<Match.GameVariant, Integer> getVariants() {
+    public Map<String, Integer> getVariants() {
         return Collections.unmodifiableMap(variants);
     }
 
-    public Map<Player.PlayerID, Integer> getPartners() {
+    public Map<String, Integer> getPartners() {
         return Collections.unmodifiableMap(partners);
     }
 
-    public Map<Player.PlayerID, Integer> getWonWith() {
+    public Map<String, Integer> getWonWith() {
         return Collections.unmodifiableMap(wonWith);
     }
     /* End of getters */
@@ -107,14 +107,14 @@ public class UserStats {
         List<Player.PlayerID> team = isWinner ? update.getWinners() : update.getLosers();
         for (Player.PlayerID id : team) {
             if (!playerId.equals(id)) {
-                partners.put(id, getOrDefaultMap(partners, id, 0) + 1);
+                partners.put(id.toString(), getOrDefaultMap(partners, id.toString(), 0) + 1);
                 if (isWinner) {
-                    wonWith.put(id, getOrDefaultMap(wonWith, id, 0) + 1);
+                    wonWith.put(id.toString(), getOrDefaultMap(wonWith, id.toString(), 0) + 1);
                 }
             }
         }
 
-        variants.put(update.getVariant(), getOrDefaultMap(variants, update.getVariant(), 0) + 1);
+        variants.put(update.getVariant().toString(), getOrDefaultMap(variants, update.getVariant().toString(), 0) + 1);
         return this;
     }
 
