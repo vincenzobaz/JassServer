@@ -64,6 +64,7 @@ public class Main {
             JsonObject body = gson.fromJson(req.body(), JsonObject.class);
             if (!validRegister(body)) {
                 res.status(400);
+                logger.error("bad request received, dropping");
                 return "bad request";
             }
             String sciper = body.get("sciper").getAsString();
@@ -77,6 +78,7 @@ public class Main {
             JsonObject jBody = gson.fromJson(req.body(), JsonObject.class);
             if (!validInvite(jBody)) {
                 res.status(400);
+                logger.error("bad request received, dropping");
                 return "bad request";
             }
             String sciper = jBody.get("sciper").getAsString();
