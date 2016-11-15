@@ -1,6 +1,7 @@
 package stats;
 
 import model.Player;
+import model.Rank;
 import server.Main;
 
 import com.google.firebase.database.*;
@@ -12,6 +13,7 @@ public class StatsBufferListener implements ChildEventListener {
     private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("stats").child("user");
     private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("stats").child("buffer");
     private DatabaseReference refArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchArchive");
+    private DatabaseReference refPlayers = FirebaseDatabase.getInstance().getReference().child("players");
 
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -72,9 +74,10 @@ public class StatsBufferListener implements ChildEventListener {
                 stats = new UserStats(id);
             }
             stats.update(matchResult);
-            stats.updateRank(new NaiveCalculator(stats));
+            Rank newRank = stats.updateRank(new NaiveCalculator(stats));
             refStats.child(dataSnapshot.getKey())
                     .setValue(stats);
+            refPlayers.child(id.toString()).child("rank").setValue(newRank);
         }
 
         @Override

@@ -136,9 +136,10 @@ public class UserStats {
      *
      * @param rankCalculator A Strategy object that computes the new rank using the UserStats object.
      */
-    protected void updateRank(RankCalculator rankCalculator) {
+    protected Rank updateRank(RankCalculator rankCalculator) {
         Rank newRank = rankCalculator.computeNewRank();
         rankByDate.get(rankByDate.size() - 1).setValue(newRank);
+        return newRank;
     }
 
     /**
