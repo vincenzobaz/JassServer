@@ -24,8 +24,8 @@ public class Main {
     static boolean DELETE_EXPIRED;
     static String REDIS_URL;
     public static Logger logger = LoggerFactory.getLogger(Main.class);
-    static Gson gson = new Gson();
-    static Jedis jedis = new Jedis(REDIS_URL);
+    static Gson gson;
+    static Jedis jedis;
 
     public static void main(String[] args) throws FileNotFoundException, UnirestException {
 
@@ -35,6 +35,9 @@ public class Main {
         DELETE_EXPIRED = Boolean.parseBoolean(System.getenv("DELETE_EXPIRED"));
         String Database = System.getenv("FIREBASE_DB");
         String FirebaseKey = System.getenv("FIREBASE_KEY");
+
+        gson = new Gson();
+        jedis = new Jedis(REDIS_URL);
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setServiceAccount(new FileInputStream(FirebaseKey))
                 .setDatabaseUrl(Database)
@@ -102,9 +105,10 @@ public class Main {
         return data.has("sciper") &&
                 data.has("matchId") &&
                 data.has("by") &&
-                jedis.exists("by") &&
-                jedis.exists("sciper");
+                jedis.exists(data.get("by").getAsString()) &&
+                jedis.exists(data.get("sciper").getAsString());
     }
+
     private static boolean validRegister(JsonObject data) {
         return data.has("sciper") && data.has("token");
     }
