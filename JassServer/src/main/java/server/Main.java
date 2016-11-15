@@ -24,6 +24,8 @@ public class Main {
     static boolean DELETE_EXPIRED;
     static String REDIS_URL;
     public static Logger logger = LoggerFactory.getLogger(Main.class);
+    static Gson gson = new Gson();
+    static Jedis jedis = new Jedis(REDIS_URL);
 
     public static void main(String[] args) throws FileNotFoundException, UnirestException {
 
@@ -48,18 +50,19 @@ public class Main {
                 .child("stats").child("buffer")
                 .addChildEventListener(new StatsBufferListener());
 
-
         Unirest.setDefaultHeader("Content-Type", "application/json");
         Unirest.setDefaultHeader("Authorization", FCM_KEY);
 
-        Gson gson = new Gson();
-        Jedis jedis = new Jedis(REDIS_URL);
 
         threadPool(8);
         port(9999);
 
         post("/register", (req, res) -> {
             JsonObject body = gson.fromJson(req.body(), JsonObject.class);
+            if (!validRegister(body)) {
+                res.status(400);
+                return "bad request";
+            }
             String sciper = body.get("sciper").getAsString();
             String token = body.get("token").getAsString();
             logger.info("Registered player " + sciper + " with token " + token);
@@ -69,6 +72,10 @@ public class Main {
 
         post("/invite", (req, res) -> {
             JsonObject jBody = gson.fromJson(req.body(), JsonObject.class);
+            if (!validInvite(jBody)) {
+                res.status(400);
+                return "bad request";
+            }
             String sciper = jBody.get("sciper").getAsString();
             String matchId = jBody.get("matchId").getAsString();
             String by = jBody.get("by").getAsString();
@@ -89,5 +96,16 @@ public class Main {
 
             return "invited";
         });
+    }
+
+    private static boolean validInvite(JsonObject data) {
+        return data.has("sciper") &&
+                data.has("matchId") &&
+                data.has("by") &&
+                jedis.exists("by") &&
+                jedis.exists("sciper");
+    }
+    private static boolean validRegister(JsonObject data) {
+        return data.has("sciper") && data.has("token");
     }
 }
