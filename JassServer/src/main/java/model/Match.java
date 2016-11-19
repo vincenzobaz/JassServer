@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import static model.Match.GameVariant.CLASSIC;
+import static model.Match.GameVariant.*;
 import static tools.RankOperationsHelper.averageRank;
 
 /**
- * Class representing a match between {@link model.Player players}.
+ * Class representing a match between players.
  * Its rank is the mean of the ranks of the players in the match.
  * A match has an expiration date (the time before it is no longer available), and can be
  * private.
@@ -51,7 +52,7 @@ public class Match {
                  GameVariant gameVariant,
                  long expirationTime,
                  String matchID) {
-        this.players = new ArrayList<Player>(players);
+        this.players = new ArrayList<>(players);
         this.location = location;
         this.description = description;
         rank = averageRank(players);
@@ -63,7 +64,7 @@ public class Match {
     }
 
     /**
-     * Constructs a Match with default variant (Classic).
+     * Constructs a Match with default variant (Chibre).
      *
      * @param players        The list of players in the match
      * @param location       The location of the match
@@ -78,7 +79,7 @@ public class Match {
                  boolean privateMatch,
                  long expirationTime,
                  String matchID) {
-        this(players, location, description, privateMatch, CLASSIC, expirationTime, matchID);
+        this(players, location, description, privateMatch, CHIBRE, expirationTime, matchID);
     }
 
     /**
@@ -176,6 +177,11 @@ public class Match {
         return this.matchID.equals(otherMatch.matchID);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(matchID);
+    }
+
     /**
      * Getter for the creator of the match, its first player.
      *
@@ -192,15 +198,51 @@ public class Match {
      * and adding a player if the match if full throws an exception.
      *
      * @param player The player to add to the match
-     * @throws IllegalStateException When the match is full
+     * @throws IllegalStateException  When the match is full
+     * @throws IllegalAccessException When the player is already in the match
      */
-    public void addPlayer(Player player) throws IllegalStateException {
+    public void addPlayer(Player player) throws IllegalStateException, IllegalAccessException {
         if (players.size() >= maxPlayerNumber) {
             throw new IllegalStateException("Match is full.");
         }
         if (!players.contains(player)) {
             players.add(player);
+        } else {
+            throw new IllegalAccessException("Player already in that Match.");
         }
+    }
+
+    /**
+     * Removes the given player to the player from list.
+     * <p>
+     * Removing a player that is not present do nothing
+     *
+     * @param toRemove The id of the player to remove from the match
+     */
+    public void removePlayerById(Player.PlayerID toRemove) throws IllegalStateException {
+        if (players.isEmpty()) {
+            throw new IllegalStateException("No players in the match.");
+        } else {
+            int index = -1;
+            for (Player p : players) {
+                if (p.getID().equals(toRemove)) {
+                    index = players.indexOf(p);
+                }
+            }
+            if(index != -1) {
+                players.remove(index);
+            }
+        }
+
+    }
+
+     /* Checks whether the given player is taking part in the match.
+     *
+     * @param player The player
+     * @return true if the player is in the match, false otherwise
+     */
+    public boolean hasParticipant(Player player) {
+        return players.contains(player);
     }
 
     public static class MatchRank extends Rank {
@@ -212,14 +254,59 @@ public class Match {
     }
 
     /**
+     * The different meld available
+     */
+    public enum Meld {
+        MARRIAGE("Stöck"),
+        THREE_CARDS("Trois carte"),
+        FIFTY("Cinquante"),
+        HUNDRED("Cent"),
+        FOUR_NINE("Cent cinquante"),
+        FOUR_JACKS("Deux cent");
+
+        private final String meldName;
+
+        private Meld(String meldName) {
+            this.meldName = meldName;
+        }
+
+        /**
+         * Returns the value of the current meld
+         * @return The value of the meld
+         */
+        public int value() {
+            switch (this) {
+                case MARRIAGE:
+                case THREE_CARDS:
+                    return 20;
+                case FIFTY:
+                    return 50;
+                case HUNDRED:
+                    return 100;
+                case FOUR_NINE:
+                    return 150;
+                case FOUR_JACKS:
+                    return 200;
+                default:
+                    return 0;
+            }
+        }
+
+    }
+
+    /**
      * The different variants of a Jass game.
-     * <li>{@link #CLASSIC}</li>
      */
     public enum GameVariant {
-        /**
-         * Classic Jass game, with 4 players.
-         */
-        CLASSIC("Classic");
+        CHIBRE("Chibre"),
+        PIQUE_DOUBLE("Pique Double"),
+        OBEN_ABE("Oben Abe"),
+        UNDEN_UFE("Unden Ufe"),
+        SLALOM("Slalom"),
+        CHICANE("Chicane"),
+        JASS_MARANT("Jass Marant"),
+        ROI("Roi"),
+        POMME("Pomme");
 
         private final String variantName;
 
@@ -239,12 +326,67 @@ public class Match {
          */
         public int getMaxPlayerNumber() {
             switch (this) {
-                case CLASSIC:
+                case CHIBRE:
+                case PIQUE_DOUBLE:
+                case OBEN_ABE:
+                case UNDEN_UFE:
+                case SLALOM:
+                case CHICANE:
+                case JASS_MARANT:
+                    return 4;
+                case ROI:
+                    return 3;
+                case POMME:
+                    return 2;
                 default:
                     return 4;
             }
         }
 
+        /**
+         * Returns the number of team for the current game variant
+         *
+         * @return The number of team
+         */
+        public int getNumberOfTeam() {
+            switch (this) {
+                case CHIBRE:
+                case PIQUE_DOUBLE:
+                case OBEN_ABE:
+                case UNDEN_UFE:
+                case SLALOM:
+                case CHICANE:
+                case JASS_MARANT:
+                case POMME:
+                    return 2;
+                case ROI:
+                    return 3;
+                default:
+                    return 2;
+            }
+        }
+
+        /**
+         * Returns the number of player by team for the current game variant
+         * @return The number of player by team
+         */
+        public int getNumberOfPlayerByTeam() {
+            switch (this) {
+                case CHIBRE:
+                case PIQUE_DOUBLE:
+                case OBEN_ABE:
+                case UNDEN_UFE:
+                case SLALOM:
+                case CHICANE:
+                case JASS_MARANT:
+                    return 2;
+                case ROI:
+                case POMME:
+                    return 1;
+                default:
+                    return 2;
+            }
+        }
     }
 
     /**
@@ -255,7 +397,7 @@ public class Match {
         public static final String DEFAULT_DESCRIPTION = "New Match";
         public static final String DEFAULT_ID = "Default Match ID";
 
-        private List<Player> players;
+        private final List<Player> players;
         private GPSPoint location;
         private String description;
         private boolean privateMatch;
@@ -268,13 +410,13 @@ public class Match {
          * Constructs a new match builder with default values, but with an empty player list.
          */
         public Builder() {
-            players = new ArrayList<Player>();
-            location = new GPSPoint(46.520407, 6.565802); // Esplanade
+            players = new ArrayList<>();
+            location = new GPSPoint(46.520450, 6.567737); // Satellite
             description = DEFAULT_DESCRIPTION;
             privateMatch = false;
-            gameVariant = CLASSIC;
-            maxPlayerNumber = CLASSIC.getMaxPlayerNumber();
-            expirationTime = Calendar.getInstance().getTimeInMillis() + 2 * 3600 * 1000; // 2 hours after current time
+            gameVariant = CHIBRE;
+            maxPlayerNumber = CHIBRE.getMaxPlayerNumber();
+            expirationTime = Calendar.getInstance().getTimeInMillis() + 1 * 3600 * 1000; // 1 hour after current time
             matchID = DEFAULT_ID;
         }
 
@@ -287,17 +429,31 @@ public class Match {
          * @param player The player to add to the match
          * @return The updated builder
          */
-        public Builder addPlayer(Player player) {
+        public Builder addPlayer(Player player) throws IllegalStateException, IllegalAccessException {
             if (players.size() >= maxPlayerNumber) {
                 throw new IllegalStateException("Match is full.");
             }
             if (!players.contains(player)) {
                 players.add(player);
+            } else {
+                throw new IllegalAccessException("Player already in that Match.");
             }
             return this;
         }
 
-        // TODO: add removePlayer method
+        public void removePlayer(Player player) throws IllegalStateException, IllegalArgumentException {
+            if (players.isEmpty()) {
+                throw new IllegalStateException("No players in the match.");
+            }
+            if (!players.contains(player)) {
+                throw new IllegalArgumentException("Player not in the Match.");
+            }
+            players.remove(player);
+        }
+
+        public List<Player> getPlayerList() {
+            return new ArrayList<>(players);
+        }
 
         public Builder setLocation(GPSPoint location) {
             this.location = location;
