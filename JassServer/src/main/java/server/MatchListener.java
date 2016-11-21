@@ -41,7 +41,7 @@ class MatchListener implements ChildEventListener {
         Date expirationDate = new Date(m.getExpirationTime());
         timer.schedule(new ExpirationNotifier(m), expirationDate);
         if (Main.DELETE_EXPIRED) {
-            timer.schedule(new MatchExpirer(m), expirationDate);
+            timer.schedule(new MatchExpirer(m.getMatchID()), expirationDate);
         }
     }
 
