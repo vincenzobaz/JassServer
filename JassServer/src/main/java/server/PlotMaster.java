@@ -8,6 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.eclipse.jetty.server.Authentication;
 import stats.UserStats;
 
 import java.util.Map;
@@ -18,16 +19,34 @@ import java.util.Map;
 public class PlotMaster implements ChildEventListener {
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        generatePlot(dataSnapshot.getValue(UserStats.class));
+        UserStats stats = dataSnapshot.getValue(UserStats.class);
+        allGraphs(stats);
     }
 
     @Override
     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-        generatePlot(dataSnapshot.getValue(UserStats.class));
+        UserStats stats = dataSnapshot.getValue(UserStats.class);
+        allGraphs(stats);
     }
 
-    private void generatePlot(UserStats data) {
-        Map<String, Integer> d = data.getVariants();
+    private void allGraphs(UserStats stats) {
+        generateBar(stats.getVariants(), stats.getPlayerId().toString(), "variants");
+        generateBar(stats.getPartners(), stats.getPlayerId().toString(), "partners");
+        generateBar(stats.getWonWith(), stats.getPlayerId().toString(), "wonWith");
+    }
+
+    private void generateBar(Map<String, Integer> d, String playerId, String graph) {
+        JsonObject body = preparePayload(d, playerId, graph);
+        try {
+            Main.logger.info("Sent bar plot request" + Unirest.post("http://graphplotter:5000/bar")
+                    .header("Content-Type", "application/json")
+                    .body(new Gson().toJson(body)).asString().getBody());
+        } catch (UnirestException e) {
+            Main.logger.error("Plot request failed " + e.getMessage());
+        }
+    }
+
+    private JsonObject preparePayload(Map<String, Integer> d, String playerId, String graph) {
         JsonArray labels = new JsonArray();
         JsonArray values = new JsonArray();
         d.keySet().forEach(k -> {
@@ -37,17 +56,11 @@ public class PlotMaster implements ChildEventListener {
         JsonObject body = new JsonObject();
         body.add("labels", labels);
         body.add("values", values);
-        body.addProperty("sciper", data.getPlayerId().toString());
+        body.addProperty("sciper", playerId);
         body.addProperty("xlabel", "Jass Variants");
         body.addProperty("ylabel", "Matches Played");
-	body.addProperty("graph", "variants");
-        try {
-            Main.logger.info("Sent plot request" + Unirest.post("http://graphplotter:5000/bar")
-                    .header("Content-Type", "application/json")
-                    .body(new Gson().toJson(body)).asString().getBody());
-        } catch (UnirestException e) {
-            Main.logger.error("Plot request failed " + e.getMessage());
-        }
+        body.addProperty("graph", graph);
+        return body;
     }
 
     @Override
