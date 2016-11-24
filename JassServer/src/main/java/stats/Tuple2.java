@@ -9,8 +9,8 @@ package stats;
  *         or a date to a rank that have to be stored in a data structure which is ordered and iterable.
  */
 class Tuple2<T, V> {
-    private T k;
-    private V v;
+    private T key;
+    private V value;
 
     /**
      * Constructor
@@ -19,8 +19,8 @@ class Tuple2<T, V> {
      * @param value
      */
     public Tuple2(T key, V value) {
-        this.k = key;
-        this.v = value;
+        this.key = key;
+        this.value = value;
     }
 
     /**
@@ -33,14 +33,14 @@ class Tuple2<T, V> {
      * @return the key of the tuple.
      */
     public T getKey() {
-        return k;
+        return key;
     }
 
     /**
      * @return the value of the tuple
      */
     public V getValue() {
-        return v;
+        return value;
     }
 
     /**
@@ -50,7 +50,7 @@ class Tuple2<T, V> {
      * @return the current object, for method chaining.
      */
     protected Tuple2<T, V> setValue(V newValue) {
-        this.v = newValue;
+        this.value = newValue;
         return this;
     }
 }
