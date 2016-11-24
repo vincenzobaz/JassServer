@@ -26,4 +26,6 @@ services:
     build: PlotServer/
     volumes:
       - /plots:/plots
+    depends_on:
+      - server
 
