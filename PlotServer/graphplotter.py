@@ -14,11 +14,12 @@ app = Flask(__name__)
 def create_bar_graph():
     # Retrieve elements
     json_dict = request.get_json()
-    labels = json_dict['labels']
-    counters = json_dict['values']
-    sciper = json_dict['sciper']
-    xlabel = json_dict['xlabel']
-    ylabel = json_dict['ylabel']
+    labels    = json_dict['labels']
+    counters  = json_dict['values']
+    sciper    = json_dict['sciper']
+    xlabel    = json_dict['xlabel']
+    ylabel    = json_dict['ylabel']
+    graph     = json_dict['graph']  
 
     # Start graph creation
     fig, ax = plt.subplots()
@@ -31,7 +32,7 @@ def create_bar_graph():
     ax.set_xlabel(xlabel)
     
     # Save plot to file
-    os = open("/plots/" + sciper + ".svg", 'w')
+    os = open("/plots/" + sciper + "_" + graph + ".svg", 'w')
     fig.savefig(os, format='svg')
     fig.clf()
     return "plotted"
