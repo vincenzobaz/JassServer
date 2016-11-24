@@ -16,6 +16,7 @@ services:
       - ./prod.env
     depends_on:
       - redis
+      - graphplotter
     volumes:
       - /JassServer/logs/
 
@@ -27,6 +28,4 @@ services:
     build: PlotServer/
     volumes:
       - /plots:/plots
-    depends_on:
-      - server
 

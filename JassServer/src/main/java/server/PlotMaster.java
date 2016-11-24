@@ -38,6 +38,7 @@ public class PlotMaster implements ChildEventListener {
     private void generateBar(Map<String, Integer> d, String playerId, String graph) {
         JsonObject body = preparePayload(d, playerId, graph);
         try {
+	    Main.logger.info("Sending request for " + new Gson().toJson(body));
             Main.logger.info("Sent bar plot request" + Unirest.post("http://graphplotter:5000/bar")
                     .header("Content-Type", "application/json")
                     .body(new Gson().toJson(body)).asString().getBody());
