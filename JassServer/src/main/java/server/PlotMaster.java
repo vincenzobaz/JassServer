@@ -40,8 +40,9 @@ public class PlotMaster implements ChildEventListener {
         body.addProperty("sciper", data.getPlayerId().toString());
         body.addProperty("xlabel", "Jass Variants");
         body.addProperty("ylabel", "Matches Played");
+	body.addProperty("graph", "variants");
         try {
-            Main.logger.info("Sent plot request" + Unirest.post("http://graphplotter:5000")
+            Main.logger.info("Sent plot request" + Unirest.post("http://graphplotter:5000/bar")
                     .header("Content-Type", "application/json")
                     .body(new Gson().toJson(body)).asString().getBody());
         } catch (UnirestException e) {
