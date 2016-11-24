@@ -8,6 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.body.RequestBodyEntity;
 import org.eclipse.jetty.server.Authentication;
 import stats.UserStats;
 
@@ -17,6 +18,7 @@ import java.util.Map;
  * Created by vinz on 11/24/16.
  */
 public class PlotMaster implements ChildEventListener {
+    private final Gson gson = new Gson();
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
         UserStats stats = dataSnapshot.getValue(UserStats.class);
@@ -38,10 +40,12 @@ public class PlotMaster implements ChildEventListener {
     private void generateBar(Map<String, Integer> d, String playerId, String graph) {
         JsonObject body = preparePayload(d, playerId, graph);
         try {
-	    Main.logger.info("Sending request for " + new Gson().toJson(body));
-            Main.logger.info("Sent bar plot request" + Unirest.post("http://graphplotter:5000/bar")
+            RequestBodyEntity req = Unirest.post("http://graphplotter:5000/bar")
                     .header("Content-Type", "application/json")
-                    .body(new Gson().toJson(body)).asString().getBody());
+                    .body(gson.toJson(body));
+            Main.logger.info("Sending request for " + gson.toJson(body));
+            Main.logger.info("Sent bar plot request" + req.asString().getBody());
+            Main.logger.info("Request response was " + req.getBody());
         } catch (UnirestException e) {
             Main.logger.error("Plot request failed " + e.getMessage());
         }
