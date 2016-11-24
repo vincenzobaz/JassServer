@@ -18,7 +18,7 @@ public class MatchExpirer extends TimerTask{
 
     public void run() {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-        
+
         ref.child("matches").child(matchId).removeValue();
         ref.child("pendingMatches").child(matchId).removeValue();
     }

@@ -48,10 +48,13 @@ public class Main {
                 .addChildEventListener(new MatchListener());
         System.out.println("Started matches listener");
 
-
         FirebaseDatabase.getInstance().getReference()
                 .child("stats").child("buffer")
                 .addChildEventListener(new StatsBufferListener());
+
+        FirebaseDatabase.getInstance().getReference()
+                .child("stats").child("user")
+                .addChildEventListener(new PlotMaster());
 
         Unirest.setDefaultHeader("Content-Type", "application/json");
         Unirest.setDefaultHeader("Authorization", FCM_KEY);
@@ -101,6 +104,8 @@ public class Main {
 
             return "invited";
         });
+
+
     }
 
     private static boolean validInvite(JsonObject data) {
