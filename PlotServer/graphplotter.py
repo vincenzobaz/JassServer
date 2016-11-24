@@ -20,6 +20,9 @@ def create_bar_graph():
     xlabel    = json_dict['xlabel']
     ylabel    = json_dict['ylabel']
     graph     = json_dict['graph']  
+    if (len(labels) == 0 or len(counters) == 0): 
+        print("Empty arrays for " + sciper + " graph: " + graph)
+        return "empty"
     assert len(labels) == len(counters)
     assert len(labels) != 0
     assert len(counters) != 0
@@ -36,8 +39,13 @@ def create_bar_graph():
     
     # Save plot to file
     os = open("/plots/" + sciper + "_" + graph + ".svg", 'w')
-    print("Written svg for " + sciper + " graph:" + graph)
     fig.savefig(os, format='svg')
+    os.close()
+    print("Written svg for " + sciper + " graph:" + graph)
     fig.clf()
     return "plotted"
+
+
+if __name__ == "__main__":
+    app.run()
 
