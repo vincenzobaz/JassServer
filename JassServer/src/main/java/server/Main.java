@@ -48,9 +48,11 @@ public class Main {
                 .addChildEventListener(new MatchListener());
         System.out.println("Started matches listener");
 
+/*
         FirebaseDatabase.getInstance().getReference()
                 .child("stats").child("buffer")
                 .addChildEventListener(new StatsBufferListener());
+*/
 
         FirebaseDatabase.getInstance().getReference()
                 .child("stats").child("user")
