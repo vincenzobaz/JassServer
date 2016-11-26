@@ -38,9 +38,10 @@ def create_bar_graph():
     ax.set_xlabel(xlabel)
     
     # Save plot to file
-    os = open("/plots/" + sciper + "_" + graph + ".svg", 'w')
-    fig.savefig(os, format='svg')
-    os.close()
+    #os = open("/plots/" + sciper + "_" + graph + ".svg", 'w')
+    #fig.savefig(os, format='svg')
+    fig.savefig("/plots/" + sciper + "_" + graph)
+    #os.close()
     print("Written svg for " + sciper + " graph:" + graph)
     fig.clf()
     return "plotted"
