@@ -40,7 +40,7 @@ def create_bar_graph(json_dict):
     #fig.savefig(os, format='svg')
     fig.savefig("/plots/" + sciper + "_" + graph)
     #os.close()
-    print("Written svg for " + sciper + " graph:" + graph)
+    print("Written bars png for " + sciper + " graph: " + graph)
     fig.clf()
 
 
@@ -69,6 +69,8 @@ def create_time_graph(json_dict):
     ax.set_xticks(y_pos)
     ax.set_yticks(np.arange(0, max(ints) + 2))
     ax.set_xticklabels([datetime.date.fromtimestamp(t // 1000) for t in dates])
+    fig.savefig("/plots" + sciper + "_" + graph)
+    print("Written times png for " + sciper + " graph: " + graph)
  
 
 def serveTimes(dic):
