@@ -40,8 +40,8 @@ public class PlotMaster implements ChildEventListener {
 
     private void generateBars(UserStats stats, String s) {
         JsonObject variants = preparePayload(stats.getVariants(), s, "variants");
-        JsonObject partners = preparePayload(stats.getVariants(), s, "partners");
-        JsonObject wonWith = preparePayload(stats.getVariants(), s, "wonWith");
+        JsonObject partners = preparePayload(stats.getPartners(), s, "partners");
+        JsonObject wonWith = preparePayload(stats.getWonWith(), s, "wonWith");
 
         JsonObject payload = new JsonObject();
         payload.add("variants", variants);
