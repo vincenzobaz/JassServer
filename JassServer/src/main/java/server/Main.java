@@ -62,7 +62,7 @@ public class Main {
         Unirest.setDefaultHeader("Authorization", FCM_KEY);
 
 
-        threadPool(3, 8, 10000);
+        threadPool(8);
         port(9999);
 
         post("/register", (req, res) -> {

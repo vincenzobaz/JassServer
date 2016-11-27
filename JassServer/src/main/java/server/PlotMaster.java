@@ -19,10 +19,13 @@ import java.util.Map;
  */
 public class PlotMaster implements ChildEventListener {
     private final Gson gson = new Gson();
+
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        /*
         UserStats stats = dataSnapshot.getValue(UserStats.class);
         allGraphs(stats);
+        */
     }
 
     @Override
@@ -32,9 +35,28 @@ public class PlotMaster implements ChildEventListener {
     }
 
     private void allGraphs(UserStats stats) {
-        generateBar(stats.getVariants(), stats.getPlayerId().toString(), "variants");
-        generateBar(stats.getPartners(), stats.getPlayerId().toString(), "partners");
-        generateBar(stats.getWonWith(), stats.getPlayerId().toString(), "wonWith");
+        generateBars(stats, stats.getPlayerId().toString());//, "variants");
+    }
+
+    private void generateBars(UserStats stats, String s) {
+        JsonObject variants = preparePayload(stats.getVariants(), s, "variants");
+        JsonObject partners = preparePayload(stats.getVariants(), s, "partners");
+        JsonObject wonWith = preparePayload(stats.getVariants(), s, "wonWith");
+
+        JsonObject payload = new JsonObject();
+        payload.add("variants", variants);
+        payload.add("partners", partners);
+        payload.add("wonWith", wonWith);
+        try {
+            RequestBodyEntity req = Unirest.post("http://graphplotter:5000/bars")
+                    .header("Content-Type", "application/json")
+                    .body(gson.toJson(payload));
+            Main.logger.info("Sending request for " + gson.toJson(payload));
+            Main.logger.info("Sent bar plot request " + req.asString().getBody());
+            Main.logger.info("Request response was " + req.getBody());
+        } catch (UnirestException e) {
+            Main.logger.error("Plot request failed " + e.getMessage());
+        }
     }
 
     private void generateBar(Map<String, Integer> d, String playerId, String graph) {

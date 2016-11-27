@@ -10,10 +10,7 @@ from flask import request
 app = Flask(__name__)
 
 
-@app.route("/bar", methods=['POST'])
-def create_bar_graph():
-    # Retrieve elements
-    json_dict = request.get_json()
+def create_bar_graph(json_dict):
     labels    = json_dict['labels']
     counters  = json_dict['values']
     sciper    = json_dict['sciper']
@@ -44,9 +41,18 @@ def create_bar_graph():
     #os.close()
     print("Written svg for " + sciper + " graph:" + graph)
     fig.clf()
-    return "plotted"
 
+
+def serve(dic):
+    for k, v in dic.items():
+        create_bar_graph(v)
+
+
+@app.route("/bars", methods=['POST'])
+def servicer():
+    json_dict = request.get_json()
+    serve(json_dict)
+    return "got it!"
 
 if __name__ == "__main__":
     app.run()
-
