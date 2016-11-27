@@ -44,8 +44,9 @@ def create_bar_graph(json_dict):
 
 
 def serve(dic):
-    for k, v in dic.items():
-        create_bar_graph(v)
+    create_bar_graph(dic['variants'])
+    create_bar_graph(dic['partners'])
+    create_bar_graph(dic['wonWith'])
 
 
 @app.route("/bars", methods=['POST'])
