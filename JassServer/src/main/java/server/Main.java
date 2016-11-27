@@ -11,7 +11,7 @@ import redis.clients.jedis.Jedis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import stats.StatsBufferListener;
+import stats.PlotMaster;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
