@@ -35,7 +35,7 @@ public class PlotMaster implements ChildEventListener {
     }
 
     private void allGraphs(UserStats stats) {
-        generateBars(stats, stats.getPlayerId().toString());//, "variants");
+        generateBars(stats, stats.getPlayerId().toString());
     }
 
     private void generateBars(UserStats stats, String s) {
@@ -84,6 +84,22 @@ public class PlotMaster implements ChildEventListener {
         body.add("labels", labels);
         body.add("values", values);
         body.addProperty("sciper", playerId);
+        String xAxis = "";
+        String yAxis = "";
+        switch (graph) {
+            case "variants":
+                xAxis = "Jass Variants";
+                yAxis = "Matches played";
+                break;
+            case "partners":
+                xAxis = "Team mates";
+                yAxis = "Matches played";
+                break;
+            case "woWith":
+                xAxis = "Team mates";
+                yAxis = "Matches won";
+                break;
+        }
         body.addProperty("xlabel", "Jass Variants");
         body.addProperty("ylabel", "Matches Played");
         body.addProperty("graph", graph);
