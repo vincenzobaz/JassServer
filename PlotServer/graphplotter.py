@@ -2,6 +2,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 from matplotlib import pyplot as plt
 import numpy as np
+import json
 
 from flask import Flask
 from flask import request
@@ -9,6 +10,37 @@ from flask import request
 import datetime
 
 app = Flask(__name__)
+
+
+@app.route("/info", methods=['GET'])
+def respond():
+    return 'Up and running'
+
+
+@app.route("/", methods=['POST'])
+def plotAll():
+    print('salut les geeks')
+    data = request.get_json()
+    print('Received data ' + json.dumps(data))
+    serve(data['bars'])
+    serveTimes(data['times'])
+    return 'got it'
+
+
+if __name__ == "__main__":
+    app.run()
+
+
+def serve(dic):
+    create_bar_graph(dic['variants'])
+    create_bar_graph(dic['partners'])
+    create_bar_graph(dic['wonWith'])
+
+
+def serveTimes(dic):
+    create_time_graph(dic['played'])
+    create_time_graph(dic['won'])
+    create_time_graph(dic['rank'])
 
 
 def create_bar_graph(json_dict):
@@ -36,18 +68,11 @@ def create_bar_graph(json_dict):
     ax.set_xlabel(xlabel)
     
     # Save plot to file
-    #os = open("/plots/" + sciper + "_" + graph + ".svg", 'w')
-    #fig.savefig(os, format='svg')
+
     fig.savefig("/plots/" + sciper + "_" + graph)
     #os.close()
     print("Written bars png for " + sciper + " graph: " + graph)
     fig.clf()
-
-
-def serve(dic):
-    create_bar_graph(dic['variants'])
-    create_bar_graph(dic['partners'])
-    create_bar_graph(dic['wonWith'])
 
 
 def create_time_graph(json_dict):
@@ -69,25 +94,11 @@ def create_time_graph(json_dict):
     ax.set_xticks(y_pos)
     ax.set_yticks(np.arange(0, max(ints) + 2))
     ax.set_xticklabels([datetime.date.fromtimestamp(t // 1000) for t in dates])
-    fig.savefig("/plots" + sciper + "_" + graph)
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel)
+
+    fig.savefig("/plots/" + sciper + "_" + graph)
     print("Written times png for " + sciper + " graph: " + graph)
  
 
-def serveTimes(dic):
-    create_time_graph(dic['played'])
-    create_time_graph(dic['won'])
-    create_time_graph(dic['rank'])
 
-@app.route("/bars", methods=['POST'])
-def servicer():
-    json_dict = request.get_json()
-    serve(json_dict)
-    return "got it!"
-
-@app.route("/times", methods=['POST'])
-def masteroftime():
-    json_dict = request.get_json()
-    serveTimes(json_dict)
-
-if __name__ == "__main__":
-    app.run()

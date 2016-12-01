@@ -6,6 +6,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.body.RequestBodyEntity;
@@ -20,14 +21,10 @@ import java.util.stream.Collectors;
  */
 public class PlotMaster implements ChildEventListener {
     private final Gson gson = new Gson();
-    private static final String PLOTTER_URL = "http://graphplotter:5000";
+    private static final String PLOTTER_URL = "http://graphplotter:5000/";
 
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        /*
-        UserStats stats = dataSnapshot.getValue(UserStats.class);
-        allGraphs(stats);
-        */
     }
 
     @Override
@@ -37,11 +34,26 @@ public class PlotMaster implements ChildEventListener {
     }
 
     private void allGraphs(UserStats stats) {
-        generateBars(stats, stats.getPlayerId().toString());
-        generateTimes(stats, stats.getPlayerId().toString());
+        JsonObject bars = generateBars(stats, stats.getPlayerId().toString());
+        JsonObject times = generateTimes(stats, stats.getPlayerId().toString());
+        JsonObject data = new JsonObject();
+        data.add("bars", bars);
+        data.add("times", times);
+        String body = gson.toJson(data);
+
+        try {
+            HttpResponse<String> res = Unirest.post(PLOTTER_URL)
+                    .header("Content-Type", "application/json")
+                    .body(body).asString();
+            Main.logger.info("Request response was " + res);
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
+        Main.logger.info("Sending request " + body);
+
     }
 
-    private void generateTimes(UserStats stats, String s) {
+    private JsonObject generateTimes(UserStats stats, String s) {
         String id = stats.getPlayerId().toString();
         JsonObject played = preparePayloadTime(stats.getPlayedByDate(), id, "played");
         JsonObject won = preparePayloadTime(stats.getPlayedByDate(), id, "won");
@@ -54,12 +66,8 @@ public class PlotMaster implements ChildEventListener {
         payload.add("played", played);
         payload.add("won", won);
         payload.add("rank", rank);
-        String body = gson.toJson(payload);
-        RequestBodyEntity req = Unirest.post(PLOTTER_URL + "/times")
-                .header("Content-Type", "application/json")
-                .body(body);
-        Main.logger.info("Sending request for " + body);
-        Main.logger.info("Response " + req.getBody());
+
+        return payload;
     }
 
     private JsonObject preparePayloadTime(List<Tuple2<Long, Integer>> timeSeries, String playerId, String graph) {
@@ -92,7 +100,7 @@ public class PlotMaster implements ChildEventListener {
         return body;
     }
 
-    private void generateBars(UserStats stats, String s) {
+    private JsonObject generateBars(UserStats stats, String s) {
         JsonObject variants = preparePayloadBars(stats.getVariants(), s, "variants");
         JsonObject partners = preparePayloadBars(stats.getPartners(), s, "partners");
         JsonObject wonWith = preparePayloadBars(stats.getWonWith(), s, "wonWith");
@@ -101,16 +109,8 @@ public class PlotMaster implements ChildEventListener {
         payload.add("variants", variants);
         payload.add("partners", partners);
         payload.add("wonWith", wonWith);
-        try {
-            RequestBodyEntity req = Unirest.post(PLOTTER_URL + "/bars")
-                    .header("Content-Type", "application/json")
-                    .body(gson.toJson(payload));
-            Main.logger.info("Sending request for " + gson.toJson(payload));
-            Main.logger.info("Sent bar plot request " + req.asString().getBody());
-            Main.logger.info("Request response was " + req.getBody());
-        } catch (UnirestException e) {
-            Main.logger.error("Plot request failed " + e.getMessage());
-        }
+
+        return payload;
     }
 
     private JsonObject preparePayloadBars(Map<String, Integer> d, String playerId, String graph) {
