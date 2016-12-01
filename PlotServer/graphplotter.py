@@ -90,7 +90,7 @@ def create_time_graph(json_dict):
     assert len(ints) != 0
     fig, ax = plt.subplots()
     y_pos = np.arange(len(dates))
-    ax.plot(y_pos, ints, color='r')
+    ax.plot(y_pos, ints, color='r', marker='o')
     ax.set_xticks(y_pos)
     ax.set_yticks(np.arange(0, max(ints) + 2))
     ax.set_xticklabels([datetime.date.fromtimestamp(t // 1000) for t in dates])
