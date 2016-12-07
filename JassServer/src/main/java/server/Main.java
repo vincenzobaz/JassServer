@@ -12,6 +12,7 @@ import redis.clients.jedis.Jedis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import stats.PlotMaster;
+import stats.StatsBufferListener;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -48,15 +49,11 @@ public class Main {
                 .addChildEventListener(new MatchListener());
         System.out.println("Started matches listener");
 
-/*
         FirebaseDatabase.getInstance().getReference()
-                .child("stats").child("buffer")
-                .addChildEventListener(new StatsBufferListener());
-*/
+                .child("matchStats").addChildEventListener(new StatsBufferListener());
 
         FirebaseDatabase.getInstance().getReference()
-                .child("stats").child("user")
-                .addChildEventListener(new PlotMaster());
+                .child("userStats").addChildEventListener(new PlotMaster());
 
         Unirest.setDefaultHeader("Content-Type", "application/json");
         Unirest.setDefaultHeader("Authorization", FCM_KEY);

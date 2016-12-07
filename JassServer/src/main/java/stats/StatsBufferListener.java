@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class StatsBufferListener implements ChildEventListener {
-    private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("stats").child("user");
-    private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("stats").child("buffer");
+    private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("userStats");
+    private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("matchStats");
     private DatabaseReference refArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchArchive");
     private DatabaseReference refPlayers = FirebaseDatabase.getInstance().getReference().child("players");
 
