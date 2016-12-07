@@ -1,14 +1,12 @@
 package stats;
 
-import model.Rank;
-
 /**
  * @author vincenzobaz
  *         <p>
  *         Abstract class defining the interface of the objects used to compute a new rank. This is part
  *         of our Strategy pattern implementation.
  */
-public abstract class RankCalculator {
+public abstract class QuoteCalculator {
     private UserStats stats;
 
     /**
@@ -16,7 +14,7 @@ public abstract class RankCalculator {
      *
      * @param stats the UserStats used to compute new value of rank.
      */
-    public RankCalculator(UserStats stats) {
+    public QuoteCalculator(UserStats stats) {
         this.stats = stats;
     }
 
@@ -34,5 +32,5 @@ public abstract class RankCalculator {
      *
      * @return Rank the updated version of the rank.
      */
-    public abstract Rank computeNewRank();
+    public abstract int computeNewQuote();
 }

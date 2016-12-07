@@ -8,6 +8,7 @@ import com.google.firebase.database.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class StatsBufferListener implements ChildEventListener {
     private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("stats").child("user");
@@ -17,16 +18,14 @@ public class StatsBufferListener implements ChildEventListener {
 
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        StatsUpdate matchResult = dataSnapshot.getValue(StatsUpdate.class);
-        Main.logger.info("Received StatsUpdate for match " + matchResult.getMatchId());
+        MatchStats matchResult = dataSnapshot.getValue(MatchStats.class);
+        Main.logger.info("Received StatsUpdate for match " + matchResult.getMatchID());
         refBuffer.child(dataSnapshot.getKey()).removeValue();
-        List<Player.PlayerID> players = new ArrayList<>();
-        players.addAll(matchResult.getWinners());
-        players.addAll(matchResult.getLosers());
-        for (Player.PlayerID id : players) {
-            retrieveAndUpdateStats(id, matchResult);
+
+        for (Player p : matchResult.getMatch().getPlayers()) {
+            retrieveAndUpdateStats(p.getID(), matchResult);
         }
-        refArchive.child(matchResult.getMatchId()).setValue(matchResult);
+        refArchive.child(matchResult.getMatch().getMatchID()).setValue(matchResult);
         refBuffer.child(dataSnapshot.getKey()).removeValue();
     }
 
@@ -50,17 +49,17 @@ public class StatsBufferListener implements ChildEventListener {
 
     }
 
-    private void retrieveAndUpdateStats(Player.PlayerID id, StatsUpdate matchResult) {
-        Main.logger.info("Updating stats of player " + id.toString() + " after match " + matchResult.getMatchId());
+    private void retrieveAndUpdateStats(Player.PlayerID id, MatchStats matchResult) {
+        Main.logger.info("Updating stats of player " + id.toString() + " after match " + matchResult.getMatch().getMatchID());
         refStats.child(id.toString())
                 .addListenerForSingleValueEvent(new StatsUpdater(id, matchResult));
     }
 
     private class StatsUpdater implements ValueEventListener {
-        private StatsUpdate matchResult;
+        private MatchStats matchResult;
         private Player.PlayerID id;
 
-        StatsUpdater(Player.PlayerID id, StatsUpdate matchResult) {
+        StatsUpdater(Player.PlayerID id, MatchStats matchResult) {
             this.matchResult = matchResult;
             this.id = id;
         }
@@ -74,10 +73,11 @@ public class StatsBufferListener implements ChildEventListener {
                 stats = new UserStats(id);
             }
             stats.update(matchResult);
-            Rank newRank = stats.updateRank(new NaiveCalculator(stats));
+            int newQuote = stats.updateRank(new NaiveCalculator(stats));
+
             refStats.child(dataSnapshot.getKey())
                     .setValue(stats);
-            refPlayers.child(id.toString()).child("rank").setValue(newRank);
+            refPlayers.child(id.toString()).child("quote").setValue(newQuote);
         }
 
         @Override

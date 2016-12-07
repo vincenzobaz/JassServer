@@ -1,6 +1,8 @@
 package model;
 
 
+import java.util.Objects;
+
 /**
  * @author Amaury Combes
  */
@@ -30,6 +32,11 @@ abstract class ID {
 
         ID otherID = (ID) other;
         return this.id == otherID.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override

@@ -1,17 +1,18 @@
 package model;
 
+
 import java.util.Objects;
 
 /**
  * Class representing a player, identified by his/her name, sciper ID,
- * and rank in the scoreboard.
+ * and quote in the scoreboard.
  */
 public class Player {
 
     private PlayerID id;
     private String lastName;
     private String firstName;
-    private Rank rank;
+    private int quote;
 
     /**
      * Default constructor required for calls to DataSnapshot.getValue when using Firebase
@@ -25,24 +26,24 @@ public class Player {
      * @param id        The ID of the player (sciper)
      * @param lastName  The last name of the player
      * @param firstName The first name of the player
-     * @param rank      The rank of the player
+     * @param quote     The quote of the player
      */
-    public Player(PlayerID id, String lastName, String firstName, Rank rank) {
+    public Player(PlayerID id, String lastName, String firstName, int quote) {
         this.id = id;
         this.lastName = lastName;
         this.firstName = firstName;
-        this.rank = rank;
+        this.quote = quote;
     }
 
     /**
-     * Constructs a new Player with a default rank.
+     * Constructs a new Player with a default quote.
      *
      * @param id        The ID of the player (sciper)
      * @param lastName  The last name of the player
      * @param firstName The first name of the player
      */
     public Player(PlayerID id, String lastName, String firstName) {
-        this(id, lastName, firstName, new PlayerRank(0));
+        this(id, lastName, firstName, 0);
     }
 
     /**
@@ -73,12 +74,12 @@ public class Player {
     }
 
     /**
-     * Getter for the rank of the player.
+     * Getter for the quote of the player.
      *
-     * @return The rank of the player
+     * @return The quote of the player
      */
-    public Rank getRank() {
-        return rank;
+    public int getQuote() {
+        return quote;
     }
 
     /**
@@ -110,25 +111,20 @@ public class Player {
         return Objects.hash(id, lastName, firstName);
     }
 
-    /**
-     * Sets the rank of the player.
-     *
-     * @param newRank The new value of the rank
-     */
-    public void setRank(Rank newRank) {
-        rank = newRank;
+    public void copy(Player p) {
+        id = p.getID();
+        lastName = p.getLastName();
+        firstName = p.getLastName();
+        quote = p.getQuote();
     }
 
-    public static class PlayerRank extends Rank {
-
-        public PlayerRank(int rank) {
-            super(rank);
-        }
-
-        public PlayerRank() {
-            // TODO get rank of last player
-        }
-
+    /**
+     * Sets the quote of the player.
+     *
+     * @param newQuote The new value of the quote
+     */
+    public void setQuote(int newQuote) {
+        quote = newQuote;
     }
 
     public static class PlayerID extends ID {

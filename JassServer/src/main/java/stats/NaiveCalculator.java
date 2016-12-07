@@ -7,13 +7,14 @@ import model.Rank;
  *         Naive implementation of a rankcalculator which considers the rank to be equal to the
  *         number of won matches.
  */
-public class NaiveCalculator extends RankCalculator {
+public class NaiveCalculator extends QuoteCalculator {
     public NaiveCalculator(UserStats stats) {
         super(stats);
     }
 
-    public Rank computeNewRank() {
-        int won = getStats().getWonMatches();
-        return new Rank(won);
+    @Override
+    public int computeNewQuote() {
+        return getStats().getWonMatches();
     }
+
 }
