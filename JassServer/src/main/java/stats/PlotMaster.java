@@ -57,9 +57,7 @@ public class PlotMaster implements ChildEventListener {
         String id = stats.getPlayerId().toString();
         JsonObject played = preparePayloadTime(stats.getPlayedByDate(), id, "played");
         JsonObject won = preparePayloadTime(stats.getPlayedByDate(), id, "won");
-        List<Tuple2<Long, Integer>> ranks = stats.getRankByDate().stream()
-                .map(tuple -> new Tuple2<>(tuple.getKey(), tuple.getValue().getRank()))
-                .collect(Collectors.toList());
+        List<Tuple2<Long, Integer>> ranks = stats.getQuoteByDate();
         JsonObject rank = preparePayloadTime(ranks, id, "rank");
 
         JsonObject payload = new JsonObject();

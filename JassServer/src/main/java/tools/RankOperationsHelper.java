@@ -20,16 +20,16 @@ public final class RankOperationsHelper {
      * @param players The list of players
      * @return The average Rank of the players
      */
-    public static Rank averageRank(List<Player> players) {
-        Rank total = new Rank(0);
+    public static int averageRank(List<Player> players) {
+        int total = 0;
         int numPlayers = 0;
 
         for (Player player : players) {
-            total = total.add(player.getRank());
+            total += player.getQuote();
             ++numPlayers;
         }
 
-        return numPlayers == 0 ? total : new Rank(total.getRank() / numPlayers); // TODO: use ceiling function?
+        return numPlayers == 0 ? total : total / numPlayers; // TODO: use ceiling function?
     }
 
 }
