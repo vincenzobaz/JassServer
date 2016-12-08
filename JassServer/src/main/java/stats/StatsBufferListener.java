@@ -1,5 +1,6 @@
 package stats;
 
+import model.Match;
 import model.Player;
 import model.Rank;
 import server.Main;
@@ -13,7 +14,10 @@ import java.util.stream.Collectors;
 public class StatsBufferListener implements ChildEventListener {
     private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("userStats");
     private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("stats").child("buffer");
-    private DatabaseReference refArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchArchive");
+
+    private DatabaseReference refMatchStatsArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchStatsArchive");
+    private DatabaseReference refMatches = FirebaseDatabase.getInstance().getReference().child("stats").child("matches");
+
     private DatabaseReference refPlayers = FirebaseDatabase.getInstance().getReference().child("players");
     private DatabaseReference refMatchStats = FirebaseDatabase.getInstance().getReference().child("matchStats");
 
@@ -25,9 +29,26 @@ public class StatsBufferListener implements ChildEventListener {
         for (Player p : matchResult.getMatch().getPlayers()) {
             retrieveAndUpdateStats(p.getID(), matchResult);
         }
-        refArchive.child(matchResult.getMatch().getMatchID()).setValue(matchResult);
-        refBuffer.child(dataSnapshot.getKey()).removeValue();
-        refMatchStats.child(dataSnapshot.getKey()).removeValue();
+
+        refMatchStatsArchive.child(matchResult.getMatchID()).setValue(matchResult);
+        refMatches.child(matchResult.getMatchID()).addListenerForSingleValueEvent(new ValueEventListener() {
+            private DatabaseReference refMatchArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchArchive");
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Match m = dataSnapshot.getValue(Match.class);
+                refMatchArchive.child(m.getMatchID()).setValue(m);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        refMatches.child(matchResult.getMatchID()).removeValue();
+        refBuffer.child(matchResult.getMatchID()).removeValue();
+        refMatchStats.child(matchResult.getMatchID()).removeValue();
     }
 
     @Override
