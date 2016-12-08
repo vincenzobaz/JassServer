@@ -33,8 +33,8 @@ public class ExpirationNotifier extends TimerTask {
         }
         JsonObject data = new JsonObject();
         data.addProperty("type", "matchexpired");
-        data.addProperty("title", "A match you joined expired!");
-        data.addProperty("text", "Tap to join another one!");
+        data.addProperty("title", "Jass@EPFL");
+        data.addProperty("body", "A match you joined expired!");
         data.addProperty("matchId", m.getMatchID());
 
         JsonObject msg = new JsonObject();

@@ -77,8 +77,8 @@ class MatchListener implements ChildEventListener {
         data.addProperty("type", "playerleft");
         data.addProperty("matchId", matchId);
         data.addProperty("sciper", traitor);
-        data.addProperty("title", "A player left your match!");
-        data.addProperty("text", "Tap to see who is still in");
+        data.addProperty("title", "Jass@EPFL");
+        data.addProperty("body", "A player left your match!");
 
         JsonObject msg = new JsonObject();
         msg.add("data", data);
@@ -96,8 +96,8 @@ class MatchListener implements ChildEventListener {
         data.addProperty("type", "playerjoined");
         data.addProperty("matchId", matchID);
         data.addProperty("sciper", sciper);
-        data.addProperty("title", "A player joined your match!");
-        data.addProperty("text", "Tap to see who it is");
+        data.addProperty("title", "Jass@EPFL");
+        data.addProperty("body", "A player joined your match!");
 
         JsonObject msg = new JsonObject();
         msg.add("data", data);
@@ -114,8 +114,8 @@ class MatchListener implements ChildEventListener {
         JsonObject data = new JsonObject();
         data.addProperty("type", "matchfull");
         data.addProperty("matchId", id);
-        data.addProperty("title", "The match you joined is full!");
-        data.addProperty("text", "Tap to know more");
+        data.addProperty("title", "Jass@EPFL");
+        data.addProperty("body", "The match you joined is full!");
 
         JsonObject msg = new JsonObject();
         msg.add("registration_ids", getIds(players));

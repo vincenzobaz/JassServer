@@ -92,8 +92,8 @@ public class Main {
             data.addProperty("type", "invite");
             data.addProperty("matchId", matchId);
             data.addProperty("by", by);
-            data.addProperty("title", "You have been invited to join a match");
-            data.addProperty("text", "Tap to join or refuse");
+            data.addProperty("title", "Jass@EPFL");
+            data.addProperty("body", "You have invited to join a match");
 
             JsonObject msg = new JsonObject();
             msg.addProperty("to", jedis.get(sciper));
@@ -103,8 +103,6 @@ public class Main {
 
             return "invited";
         });
-
-
     }
 
     private static boolean validInvite(JsonObject data) {
