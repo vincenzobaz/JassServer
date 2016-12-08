@@ -15,6 +15,7 @@ public class StatsBufferListener implements ChildEventListener {
     private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("stats").child("buffer");
     private DatabaseReference refArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchArchive");
     private DatabaseReference refPlayers = FirebaseDatabase.getInstance().getReference().child("players");
+    private DatabaseReference refMatchStats = FirebaseDatabase.getInstance().getReference().child("matchStats");
 
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -26,6 +27,7 @@ public class StatsBufferListener implements ChildEventListener {
         }
         refArchive.child(matchResult.getMatch().getMatchID()).setValue(matchResult);
         refBuffer.child(dataSnapshot.getKey()).removeValue();
+        refMatchStats.child(dataSnapshot.getKey()).removeValue();
     }
 
     @Override
