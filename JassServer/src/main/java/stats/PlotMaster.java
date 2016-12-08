@@ -89,7 +89,7 @@ public class PlotMaster implements ChildEventListener {
                 yAxis = "Matches won";
                 break;
             case "rank":
-                yAxis = "rank";
+                yAxis = "Quote";
                 break;
         }
         body.addProperty("xlabel", xAxis);
