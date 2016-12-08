@@ -50,7 +50,7 @@ public class Main {
         System.out.println("Started matches listener");
 
         FirebaseDatabase.getInstance().getReference()
-                .child("matchStats").addChildEventListener(new StatsBufferListener());
+                .child("stats").child("buffer").addChildEventListener(new StatsBufferListener());
 
         FirebaseDatabase.getInstance().getReference()
                 .child("userStats").addChildEventListener(new PlotMaster());

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class StatsBufferListener implements ChildEventListener {
     private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("userStats");
-    private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("matchStats");
+    private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("stats").child("buffer");
     private DatabaseReference refArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchArchive");
     private DatabaseReference refPlayers = FirebaseDatabase.getInstance().getReference().child("players");
 
@@ -20,7 +20,6 @@ public class StatsBufferListener implements ChildEventListener {
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
         MatchStats matchResult = dataSnapshot.getValue(MatchStats.class);
         Main.logger.info("Received StatsUpdate for match " + matchResult.getMatchID());
-        refBuffer.child(dataSnapshot.getKey()).removeValue();
 
         for (Player p : matchResult.getMatch().getPlayers()) {
             retrieveAndUpdateStats(p.getID(), matchResult);
