@@ -8,6 +8,7 @@ import server.Main;
 import com.google.firebase.database.*;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,7 @@ public class StatsBufferListener implements ChildEventListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Match m = dataSnapshot.getValue(Match.class);
+                m.setTime(Calendar.getInstance().getTimeInMillis());
                 refMatchArchive.child(m.getMatchID()).setValue(m);
             }
 
