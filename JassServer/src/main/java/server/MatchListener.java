@@ -15,8 +15,6 @@ import redis.clients.jedis.Jedis;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
 class MatchListener implements ChildEventListener {
     private Map<String, Match> matches;
     private final Timer timer;
@@ -38,7 +36,7 @@ class MatchListener implements ChildEventListener {
         Match m = dataSnapshot.getValue(Match.class);
         matches.put(id, m);
 
-        Date expirationDate = new Date(m.getExpirationTime());
+        Date expirationDate = new Date(m.getTime());
         timer.schedule(new ExpirationNotifier(m), expirationDate);
         if (Main.DELETE_EXPIRED) {
             timer.schedule(new MatchExpirer(m.getMatchID()), expirationDate);
