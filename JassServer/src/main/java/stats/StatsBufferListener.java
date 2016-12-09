@@ -12,14 +12,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class StatsBufferListener implements ChildEventListener {
-    private DatabaseReference refStats = FirebaseDatabase.getInstance().getReference().child("userStats");
-    private DatabaseReference refBuffer = FirebaseDatabase.getInstance().getReference().child("stats").child("buffer");
+    private DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+    private DatabaseReference refStats = root.child("userStats");
 
-    private DatabaseReference refMatchStatsArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchStatsArchive");
-    private DatabaseReference refMatches = FirebaseDatabase.getInstance().getReference().child("stats").child("matches");
+    // Read about finished games
+    private DatabaseReference refBuffer = root.child("stats").child("buffer");
 
-    private DatabaseReference refPlayers = FirebaseDatabase.getInstance().getReference().child("players");
-    private DatabaseReference refMatchStats = FirebaseDatabase.getInstance().getReference().child("matchStats");
+    // MatchStats archive
+    private DatabaseReference refMatchStatsArchive = root.child("stats").child("matchStatsArchive");
+
+    // Delete match we received matchStats of
+    private DatabaseReference refMatches = root.child("matches");
+    // Delete matchStats upon receiving matchStats in buffer
+    private DatabaseReference refMatchStats = root.child("matchStats");
+
+    // Update quote
+    private DatabaseReference refPlayers = root.child("players");
+
+    private DatabaseReference refMatchArchive = root.child("stats").child("matchArchive");
 
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -32,12 +42,10 @@ public class StatsBufferListener implements ChildEventListener {
 
         refMatchStatsArchive.child(matchResult.getMatchID()).setValue(matchResult);
         refMatches.child(matchResult.getMatchID()).addListenerForSingleValueEvent(new ValueEventListener() {
-            private DatabaseReference refMatchArchive = FirebaseDatabase.getInstance().getReference().child("stats").child("matchArchive");
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Match m = dataSnapshot.getValue(Match.class);
                 refMatchArchive.child(m.getMatchID()).setValue(m);
-
             }
 
             @Override
