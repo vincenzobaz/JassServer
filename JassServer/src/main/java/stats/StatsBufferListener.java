@@ -103,7 +103,7 @@ public class StatsBufferListener implements ChildEventListener {
                 stats = new UserStats(id);
             }
             stats.update(matchResult);
-            int newQuote = stats.getLastQuote();
+            int newQuote = stats.lastQuote();
 
             refStats.child(dataSnapshot.getKey())
                     .setValue(stats);
