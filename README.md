@@ -13,7 +13,6 @@ The `prod.env` file must contain:
 
  - `FCM_KEY` : Firebase Cloud Messaging key
  - `FCM_URL`: The URL of the Firebase Cloud Messaging servers. At the time of project creation it is `https://fcm.googleapis.com/fcm/send`
- - `REDIS_HOST`: The redis hostname, which based on our docker compose services, is simply `redis`
  - `DELETE_EXPIRED` : `true` if you want to schedule the destruction of matches at their expiration date, else `false`
  - `FIREBASE_DB` : The url of the Firabse Realtime Database.
  - `FIREBASE_KEY` : Path to the json key file necessary to authenticate with Firebase and have access to the Database

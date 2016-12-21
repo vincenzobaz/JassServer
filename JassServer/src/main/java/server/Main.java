@@ -23,7 +23,7 @@ public class Main {
     static String FCM_KEY;
     static String FCM_URL;
     static boolean DELETE_EXPIRED;
-    static String REDIS_URL;
+    static final String REDIS_URL = "redis";
     public static Logger logger = LoggerFactory.getLogger(Main.class);
     static Gson gson;
     static Jedis jedis;
@@ -32,7 +32,6 @@ public class Main {
 
         FCM_KEY = "key=" + System.getenv("FCM_KEY");
         FCM_URL = System.getenv("FCM_URL");
-        REDIS_URL = System.getenv("REDIS_HOST");
         DELETE_EXPIRED = Boolean.parseBoolean(System.getenv("DELETE_EXPIRED"));
         String Database = System.getenv("FIREBASE_DB");
         String FirebaseKey = System.getenv("FIREBASE_KEY");
