@@ -16,6 +16,7 @@ public class Namer implements ChildEventListener {
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
         Player p = dataSnapshot.getValue(Player.class);
         jedis.set(p.getID().toString() + 'N', p.getFirstName());
+        Main.logger.debug("Server saved name " + p.getFirstName());
     }
 
     @Override
