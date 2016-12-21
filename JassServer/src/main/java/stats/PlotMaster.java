@@ -10,6 +10,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.body.RequestBodyEntity;
+import redis.clients.jedis.Jedis;
 import server.Main;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class PlotMaster implements ChildEventListener {
     private final Gson gson = new Gson();
     private static final String PLOTTER_URL = "http://graphplotter:5000/";
+    private final Jedis jedis = new Jedis(Main.REDIS_URL);
 
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -114,8 +116,9 @@ public class PlotMaster implements ChildEventListener {
     private JsonObject preparePayloadBars(Map<String, Integer> d, String playerId, String graph) {
         JsonArray labels = new JsonArray();
         JsonArray values = new JsonArray();
+        boolean isWonWith = graph.equals("wonWith");
         d.keySet().forEach(k -> {
-            labels.add(k);
+            labels.add(isWonWith ? jedis.get(k + 'N') : k);
             values.add(d.get(k));
         });
         JsonObject body = new JsonObject();

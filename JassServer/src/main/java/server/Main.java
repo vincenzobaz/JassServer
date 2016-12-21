@@ -23,7 +23,7 @@ public class Main {
     static String FCM_KEY;
     static String FCM_URL;
     static boolean DELETE_EXPIRED;
-    static final String REDIS_URL = "redis";
+    public static final String REDIS_URL = "redis";
     public static Logger logger = LoggerFactory.getLogger(Main.class);
     static Gson gson;
     static Jedis jedis;
@@ -53,6 +53,9 @@ public class Main {
 
         FirebaseDatabase.getInstance().getReference()
                 .child("userStats").addChildEventListener(new PlotMaster());
+
+        FirebaseDatabase.getInstance().getReference()
+                .child("players").addChildEventListener(new Namer());
 
         Unirest.setDefaultHeader("Content-Type", "application/json");
         Unirest.setDefaultHeader("Authorization", FCM_KEY);
