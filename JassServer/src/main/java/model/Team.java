@@ -1,5 +1,6 @@
 package model;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,19 +62,14 @@ public class Team {
             return false;
         } else if (o == this) {
             return true;
-        } else if (o.getClass().getName() != this.getClass().getName()) {
-            return false;
-        } else {
-            if (((Team) o).members.containsAll(this.members) && this.members.containsAll(((Team) o).members)) {
-                return true;
-            }
+        } else if (o.getClass() != this.getClass()) {
             return false;
         }
+        return ((Team) o).members.containsAll(this.members) && this.members.containsAll(((Team) o).members);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(members);
     }
-
 }

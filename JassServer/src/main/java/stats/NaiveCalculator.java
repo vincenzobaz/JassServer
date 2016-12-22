@@ -1,7 +1,5 @@
 package stats;
 
-import model.Rank;
-
 /**
  * @author vincenzobaz
  *         Naive implementation of a rankcalculator which considers the rank to be equal to the

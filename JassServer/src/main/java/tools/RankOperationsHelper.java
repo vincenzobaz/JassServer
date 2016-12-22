@@ -4,11 +4,9 @@ package tools;
 import java.util.List;
 
 import model.Player;
-import model.Rank;
 
 /**
  * Class used to perform arithmetic operations on
- * {@link Rank Ranks}.
  */
 public final class RankOperationsHelper {
 

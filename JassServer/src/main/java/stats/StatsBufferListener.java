@@ -2,15 +2,11 @@ package stats;
 
 import model.Match;
 import model.Player;
-import model.Rank;
 import server.Main;
 
 import com.google.firebase.database.*;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class StatsBufferListener implements ChildEventListener {
     private DatabaseReference root = FirebaseDatabase.getInstance().getReference();

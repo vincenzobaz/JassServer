@@ -7,18 +7,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 
 import static model.Match.GameVariant.CHIBRE;
 import static model.QuoteOperationsHelper.averageQuote;
 
-/**
- * Class representing a match between.
- * Its quote is the mean of the quotes of the players in the match.
- * A match has an expiration date (the time before it is no longer available), and can be
- * private.
- */
 public class Match {
 
     private List<Player> players;
@@ -30,9 +26,11 @@ public class Match {
     private int maxPlayerNumber;
     private long time;
     private String matchID;
+    private Map<String, Boolean> hasCards;
     private MatchStatus matchStatus;
     private Map<String, List<String>> teams;
-    private static String SENTINEL = "SENTINEL";
+    private final static String SENTINEL = "SENTINEL";
+    private final static int ONE_HOUR = 3600000;
 
     /**
      * Default constructor required for calls to DataSnapshot.getValue when using Firebase.
@@ -50,6 +48,7 @@ public class Match {
      * @param gameVariant    The variant of the match
      * @param time The time at which the match expires (in milliseconds after epoch)
      * @param matchID        The unique firebase ID of the match
+     * @param hasCards       A list of who has cards available for the match
      * @param status         The status of the match
      */
     public Match(List<Player> players,
@@ -59,6 +58,7 @@ public class Match {
                  GameVariant gameVariant,
                  long time,
                  String matchID,
+                 Map<String, Boolean> hasCards,
                  MatchStatus status) {
         this.players = new ArrayList<>(players);
         this.location = location;
@@ -69,6 +69,8 @@ public class Match {
         this.maxPlayerNumber = gameVariant.getMaxPlayerNumber();
         this.time = time;
         this.matchID = matchID;
+        this.hasCards = hasCards;
+        this.hasCards.put(SENTINEL, false);
         this.matchStatus = status;
         this.teams = new HashMap<>();
         for (int teamNb = 0; teamNb < gameVariant.getNumberOfTeam(); ++teamNb) {
@@ -78,6 +80,10 @@ public class Match {
 
             this.teams.get("Team" + Integer.toString(teamNb)).add(SENTINEL);
         }
+    }
+
+    public Map<String, Boolean> getHasCards() {
+        return hasCards;
     }
 
     /**
@@ -98,58 +104,61 @@ public class Match {
                  GameVariant gameVariant,
                  long time,
                  String matchID) {
-        this(players, location, description, privateMatch, gameVariant, time, matchID, MatchStatus.PENDING);
+        this(players, location, description, privateMatch, gameVariant, time, matchID, new HashMap<String, Boolean>(), MatchStatus.PENDING);
+    }
+
+    /**
+     * Constructs a Match with default variant (Chibre) and the default status (pending).
+     *
+     * @param players        The list of players in the match
+     * @param location       The location of the match
+     * @param description    A brief description of the match (detailed location...)
+     * @param privateMatch   The visibility of the match (public or private)
+     * @param time The time at which the match expires (in milliseconds after epoch)
+     * @param matchID        The unique firebase ID of the match
+     * @param hasCards       A list of who has cards available for the match
+     */
+    public Match(List<Player> players,
+                 GPSPoint location,
+                 String description,
+                 boolean privateMatch,
+                 long time,
+                 String matchID,
+                 Map<String, Boolean> hasCards) {
+        this(players, location, description, privateMatch, CHIBRE, time, matchID, hasCards, MatchStatus.PENDING);
     }
 
     /**
      * Checks if the match has changed
      *
-     * @param other
-     * @return True if the match has changed, false otherwise
+     * @param other the match to compare to
+     * @return true if the match has changed, false otherwise
      */
     public boolean matchHasChanged(Match other) {
-        if(!other.equals(this)) {
+        if (!other.equals(this)) {
             return false;
-        }
-        else {
-            if(!other.players.equals(this.players)) {
+        } else {
+            if (!other.players.equals(this.players)) {
+                return true;
+            } else if (!other.location.equals(this.location)) {
+                return true;
+            } else if (!other.description.equals(this.description)) {
+                return true;
+            } else if(other.quote != this.quote) {
+                return true;
+            } else if (other.privateMatch != this.privateMatch) {
+                return true;
+            } else if (other.maxPlayerNumber != this.maxPlayerNumber) {
+                return true;
+            } else if (other.time != this.time) {
+                return true;
+            } else if (!other.matchStatus.equals(this.matchStatus)) {
+                return true;
+            } else if (!other.teams.equals(this.teams)) {
+                return true;
+            }else if (!other.hasCards.equals(this.hasCards)) {
                 return true;
             }
-            if(!other.location.equals(this.location)) {
-                return true;
-            }
-            if(!other.description.equals(this.description)) {
-                return true;
-            }
-            if(other.quote != this.quote) {
-                return true;
-            }
-            if(other.privateMatch != this.privateMatch) {
-                return true;
-            }
-            if(other.maxPlayerNumber != this.maxPlayerNumber) {
-                return true;
-            }
-            if(other.time != this.time) {
-                return true;
-            }
-            if(!other.matchStatus.equals(this.matchStatus)) {
-                return true;
-            }
-            if(!other.teams.equals(this.teams)) {
-                return true;
-            }
-            /*if(other.players != this.players
-                    || other.location != this.location
-                    || other.description != this.description
-                    || other.rank != this.rank
-                    || other.privateMatch != this.privateMatch
-                    || other.maxPlayerNumber != this.maxPlayerNumber
-                    || other.time != this.time
-                    || other.matchStatus != this.matchStatus
-                    || other.teams != this.teams) {
-                return true;
-            }*/
             return false;
         }
     }
@@ -209,7 +218,7 @@ public class Match {
         GPSPoint BCCoord = new GPSPoint(46.518470, 6.561907);
         return new Match(players, BCCoord, "Sentinel match", true,
                 GameVariant.CHIBRE, Calendar.getInstance().getTimeInMillis() + 2 * 3600 * 1000,
-                "sentiMatch", MatchStatus.PENDING);
+                "sentiMatch", new HashMap<String, Boolean>(), MatchStatus.PENDING);
     }
 
     /**
@@ -277,7 +286,69 @@ public class Match {
     }
 
     /**
+     * Getter for the card parameter, return true if player has cards, false othewise.
+     *
+     * @return return boolean if have cards available.
+     */
+    public boolean getPlayerCards(String playerID) {
+        if (playerID != null && hasCards.containsKey(playerID)){
+            return hasCards.get(playerID);
+        }
+        else{
+            return false;
+        }
+    }
+
+    /**
+     * Getter for the player if he is already in the list
+     *
+     * @return boolean if player in list
+     */
+    public boolean playerInCardList(String playerID) {
+        if (playerID != null && hasCards.containsKey(playerID)){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * Checker for hasCards, return false if empty, true otherwise.
+     *
+     * @return boolean true if someone have cards, false otherwise.
+     */
+    public boolean hasCards() {
+        if(hasCards.containsValue(true)){
+            return true;
+        }
+        else {
+            return false;
+        }
+     }
+
+    /**
+     * Set
+     * @param hasCards
+     */
+    public void setHasCards(Map<String, Boolean> hasCards) {
+        this.hasCards = hasCards;
+    }
+
+    /**
+     * Setter for player cards
+     * @param playerID  the id of the player to set cards
+     * @param cards boolean if player has cards
+     */
+    public void setPlayerCards(String playerID, Boolean cards){
+        if (playerID != null) {
+            hasCards.put(playerID, cards);
+        }
+    }
+
+    /**
      * Setter for the expiration time
+     *
      * @param expTime The expiration time to set
      */
     public void setTime(long expTime) {
@@ -392,10 +463,20 @@ public class Match {
             throw new IllegalStateException("Match is full.");
         }
         if (!players.contains(player)) {
-            players.add(player);
+                players.add(player);
         } else {
             throw new IllegalAccessException("Player already in that Match.");
         }
+    }
+
+    public Player getPlayerById(String id) {
+        Player.PlayerID playerId = new Player.PlayerID(id);
+        for (Player player : players) {
+            if (player.getID().equals(playerId)) {
+                return player;
+            }
+        }
+        throw new NoSuchElementException("No player with this id in this match");
     }
 
     /**
@@ -423,6 +504,9 @@ public class Match {
                 if (t.isEmpty()) {
                     t.add(SENTINEL);
                 }
+            }
+            if (hasCards.containsKey(toRemove)) {
+                hasCards.remove(toRemove);
             }
             return true;
         }
@@ -529,7 +613,6 @@ public class Match {
      */
     public enum MatchStatus {
         ACTIVE("ACTIVE"),
-        FINISHED("FINISHED"),
         PENDING("PENDING");
 
         private final String statusName;
@@ -550,11 +633,11 @@ public class Match {
     public enum Meld {
         SENTINEL("Sentinel"),
         MARRIAGE("Stöck"),
-        THREE_CARDS("Trois cartes"),
-        FIFTY("Cinquante"),
-        HUNDRED("Cent"),
-        FOUR_NINE("Cent cinquante"),
-        FOUR_JACKS("Deux cent");
+        THREE_CARDS("Twenty"),
+        FIFTY("Fifty"),
+        HUNDRED("Hundred"),
+        FOUR_NINE("Hundred fifty"),
+        FOUR_JACKS("Two hundred");
 
         private final String meldName;
 
@@ -603,9 +686,7 @@ public class Match {
         UNDEN_UFE("Unden Ufe"),
         SLALOM("Slalom"),
         CHICANE("Chicane"),
-        JASS_MARANT("Jass Marant"),
-        ROI("Roi"),
-        POMME("Pomme");
+        JASS_MARANT("Jass Marant");
 
         private final String variantName;
 
@@ -625,10 +706,6 @@ public class Match {
          */
         public int getMaxPlayerNumber() {
             switch (this) {
-                case POMME:
-                    return 2;
-                case ROI:
-                    return 3;
                 case CHIBRE:
                 case PIQUE_DOUBLE:
                 case OBEN_ABE:
@@ -648,8 +725,6 @@ public class Match {
          */
         public int getNumberOfTeam() {
             switch (this) {
-                case ROI:
-                    return 3;
                 case CHIBRE:
                 case PIQUE_DOUBLE:
                 case OBEN_ABE:
@@ -657,7 +732,6 @@ public class Match {
                 case SLALOM:
                 case CHICANE:
                 case JASS_MARANT:
-                case POMME:
                 default:
                     return 2;
             }
@@ -670,9 +744,6 @@ public class Match {
          */
         public int getNumberOfPlayerByTeam() {
             switch (this) {
-                case ROI:
-                case POMME:
-                    return 1;
                 case CHIBRE:
                 case PIQUE_DOUBLE:
                 case OBEN_ABE:
@@ -692,9 +763,6 @@ public class Match {
          */
         public int getPointGoal() {
             switch (this) {
-                case ROI:
-                case POMME:
-                    return 20;
                 case CHIBRE:
                     return 1000;
                 case PIQUE_DOUBLE:
@@ -724,8 +792,9 @@ public class Match {
         private boolean privateMatch;
         private GameVariant gameVariant;
         private int maxPlayerNumber;
-        private long expirationTime;
+        private long time;
         private String matchID;
+        private Map<String, Boolean> hasCards;
         private MatchStatus matchStatus;
 
         /**
@@ -738,8 +807,9 @@ public class Match {
             privateMatch = false;
             gameVariant = CHIBRE;
             maxPlayerNumber = CHIBRE.getMaxPlayerNumber();
-            expirationTime = Calendar.getInstance().getTimeInMillis() + 1 * 3600 * 1000; // 1 hour after current time
+            time = Calendar.getInstance().getTimeInMillis() + ONE_HOUR; // 1 hour after current time
             matchID = DEFAULT_ID;
+            hasCards = new HashMap<>();
             matchStatus = MatchStatus.PENDING;
         }
 
@@ -824,6 +894,20 @@ public class Match {
             return this;
         }
 
+        public Map<String, Boolean> getHasCards() {
+            return new HashMap<>(hasCards);
+        }
+
+        public void setHasCards(Map<String, Boolean> hasCards) {
+            this.hasCards = hasCards;
+            if(this.hasCards == null) {
+                this.hasCards = new HashMap<>();
+            }
+            if(this.hasCards.isEmpty()) {
+                this.hasCards.put(SENTINEL, false);
+            }
+        }
+
         /**
          * Sets the game variant to the given value.
          * <p>
@@ -841,11 +925,11 @@ public class Match {
         /**
          * Setter for the expiration time of this match
          *
-         * @param expirationTime the expiration time to be set
+         * @param time the expiration time to be set
          * @return A builder containing this expiration time
          */
-        public Builder setExpirationTime(long expirationTime) {
-            this.expirationTime = expirationTime;
+        public Builder setTime(long time) {
+            this.time = time;
             return this;
         }
 
@@ -890,14 +974,36 @@ public class Match {
          * @throws IllegalStateException If building with no players or too many players
          */
         public Match build() throws IllegalStateException {
-            // TODO: check validity of arguments
+            // If an error occured puts parameters back to basic state
+            if(location == null) {
+                location = new GPSPoint(46.520450, 6.567737);
+            }
+
+            if(description == null || description.equals("")) {
+                description = DEFAULT_DESCRIPTION;
+            }
+
+            if(maxPlayerNumber != gameVariant.getMaxPlayerNumber()) {
+                maxPlayerNumber = gameVariant.getMaxPlayerNumber();
+            }
+
+            if(time < Calendar.getInstance().getTimeInMillis()) {
+                time = Calendar.getInstance().getTimeInMillis() + (3600 * 1000);
+            }
+
+            // Need to generate random matchId when error.
+            if(matchID == null || matchID.equals("")) {
+                Random generator = new Random();
+                matchID = DEFAULT_ID + generator.nextInt(100000);
+            }
+
             if (players.isEmpty()) {
                 throw new IllegalStateException("Cannot create match without any player.");
             } else if (players.size() > maxPlayerNumber) {
                 throw new IllegalStateException("Too many players.");
             } else {
                 return new Match(players, location, description, privateMatch,
-                        gameVariant, expirationTime, matchID, matchStatus);
+                        gameVariant, time, matchID, hasCards, matchStatus);
             }
         }
 

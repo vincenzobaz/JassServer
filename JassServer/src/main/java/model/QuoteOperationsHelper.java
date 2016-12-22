@@ -3,7 +3,6 @@ package model;
 
 import java.util.List;
 
-import model.Player;
 
 /**
  * Class used to perform arithmetic operations on quotes
