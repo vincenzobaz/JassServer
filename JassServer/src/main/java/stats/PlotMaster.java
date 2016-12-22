@@ -116,9 +116,9 @@ public class PlotMaster implements ChildEventListener {
     private JsonObject preparePayloadBars(Map<String, Integer> d, String playerId, String graph) {
         JsonArray labels = new JsonArray();
         JsonArray values = new JsonArray();
-        boolean isWonWith = graph.equals("wonWith");
+        boolean needsName = graph.equals("wonWith") || graph.equals("partners");
         d.keySet().forEach(k -> {
-            labels.add(isWonWith ? jedis.get(k + 'N') : k);
+            labels.add(needsName ? jedis.get(k + 'N') : k);
             values.add(d.get(k));
         });
         JsonObject body = new JsonObject();
