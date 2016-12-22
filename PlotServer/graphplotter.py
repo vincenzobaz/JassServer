@@ -1,15 +1,30 @@
+# Plotting dependencies
 import matplotlib as mpl
 mpl.use('Agg')
 from matplotlib import pyplot as plt
 import numpy as np
 import json
 
+# Server
 from flask import Flask
 from flask import request
+from queue import Queue
+from threading import Thread
 
 import datetime
 
 app = Flask(__name__)
+
+
+q = Queue()
+
+def worker():
+    while True:
+        if not q.empty():
+            data = q.get()
+            serve(data['bars'])
+            serveTimes(data['times'])
+            q.task_done()
 
 
 @app.route("/info", methods=['GET'])
@@ -22,13 +37,14 @@ def plotAll():
     print('salut les geeks')
     data = request.get_json()
     print('Received data ' + json.dumps(data))
-    serve(data['bars'])
-    serveTimes(data['times'])
+    q.put(data)
     return 'got it'
 
 
 if __name__ == "__main__":
     app.run()
+    t = Thread(target=worker)
+    t.start()
 
 
 def serve(dic):
@@ -99,6 +115,4 @@ def create_time_graph(json_dict):
 
     fig.savefig("/plots/" + sciper + "_" + graph)
     print("Written times png for " + sciper + " graph: " + graph)
- 
-
 
