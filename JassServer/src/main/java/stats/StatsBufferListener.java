@@ -105,16 +105,25 @@ public class StatsBufferListener implements ChildEventListener {
                 stats = new UserStats(id);
             }
             stats.update(matchResult);
-            int newQuote = stats.updateRank(new NaiveCalculator(stats));
 
-            refStats.child(dataSnapshot.getKey())
-                    .setValue(stats);
-            refPlayers.child(id.toString()).child("quote").setValue(newQuote);
+            updateUserStats(stats, stats.getPlayerId().toString());
         }
-
+        
         @Override
         public void onCancelled(DatabaseError databaseError) {
 
         }
+        
+        private void updateUserStats(UserStats stats, String id) {
+			refStats.child(id).child("playerId").setValue(stats.getPlayerId());
+			refStats.child(id).child("playedMatches").setValue(stats.getPlayedMatches());
+			refStats.child(id).child("wonMatches").setValue(stats.getWonMatches());
+			refStats.child(id).child("playedByDate").setValue(stats.getPlayedByDate());
+			refStats.child(id).child("wonByDate").setValue(stats.getWonByDate());
+			refStats.child(id).child("quoteByDate").setValue(stats.getQuoteByDate());
+			refStats.child(id).child("variants").setValue(stats.getVariants());
+			refStats.child(id).child("partners").setValue(stats.getPartners());
+			refStats.child(id).child("wonWith").setValue(stats.getWonWith());
+		}
     }
 }
