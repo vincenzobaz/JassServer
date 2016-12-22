@@ -17,4 +17,3 @@ The `prod.env` file must contain:
  - `DELETE_EXPIRED` : `true` if you want to schedule the destruction of matches at their expiration date, else `false`
  - `FIREBASE_DB` : The url of the Firabse Realtime Database.
  - `FIREBASE_KEY` : Path to the json key file necessary to authenticate with Firebase and have access to the Database
-```
