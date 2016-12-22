@@ -1,12 +1,17 @@
 package stats;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +19,7 @@ import model.Match;
 import model.Player;
 import stats.trueskill.GameInfo;
 import stats.trueskill.Rank;
+import stats.trueskill.SkillCalculator;
 
 
 /**
@@ -44,12 +50,14 @@ public class UserStats {
     // How many matches have been as a partner of other players.
     private Map<String, Integer> partners = new HashMap<>();
     // How many matches have been won as a partner of other players.
-    private Map<String, Integer> wonWith;
+    private Map<String, Integer> wonWith = new HashMap<>();
+
+    private int newQuote = -1;
 
     /**
      * Constructor, only start with user id.
      *
-     * @param id the user id
+     * @param id
      */
     public UserStats(Player.PlayerID id) {
         this.playerId = id;
@@ -71,6 +79,9 @@ public class UserStats {
 
     }
 
+    public Integer lastQuote() {
+        return quoteByDate.get(quoteByDate.size() - 1).getValue();
+    }
     public void setRank(Rank rank) {
         this.rank = rank;
     }
@@ -122,8 +133,10 @@ public class UserStats {
      *
      * @param stats The results of a concluded match
      */
-    public UserStats update(MatchStats stats) {
+    protected UserStats update(MatchStats stats) {
         prepareLastBuckets(Calendar.getInstance().getTimeInMillis());
+
+        updateQuote(stats);
 
         Match match = stats.getMatch();
         playedMatches += 1;
@@ -164,21 +177,79 @@ public class UserStats {
         }
     }
 
-    /**
-     * Updates the rank object of the day specified in timestamp according to new information.
-     *
-     * @param quoteCalculator A Strategy object that computes the new rank using the UserStats object.
-     */
-    protected void updateRank(QuoteCalculator quoteCalculator) {
-        Integer newRank = quoteCalculator.computeNewQuote();
-        quoteByDate.get(quoteByDate.size() - 1).setValue(newRank);
+    protected void updateQuote(MatchStats ms) {
+        Map<String, List<String>> teams = ms.getMatch().getTeams();
+        final Rank[] playersRank = new Rank[4];
+        final List<Boolean> status = Arrays.asList(false, false, false, false);
+        String currentUserId = playerId.toString();
+        int index = 0;
+
+        int winner = ms.getWinnerIndex();
+        getRankFromServer(currentUserId, playersRank, winner, currentUserId, index, status);
+
+        for (List<String> team : teams.values()) {
+            if (team.contains(currentUserId)) {
+                for (String id : team) {
+                    if (!id.equals(currentUserId)) {
+                        ++index;
+                        getRankFromServer(id, playersRank, winner, currentUserId, index, status);
+                    }
+                }
+            }
+        }
+
+        for (List<String> team : teams.values()) {
+            if (!team.contains(currentUserId)) {
+                for (String id : team) {
+                    ++index;
+                    getRankFromServer(id, playersRank, winner, currentUserId, index, status);
+                }
+
+            }
+        }
+    }
+
+    private void getRankFromServer(String playerId, final Rank[] playersRank, final int winner, final String currentUserId, final int index, final List<Boolean> status) {
+        FirebaseDatabase.getInstance().getReference()
+                .child("userStats").child(playerId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    private DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        UserStats userStats = dataSnapshot.getValue(UserStats.class);
+                        if (userStats == null) {
+                            if (index == 0) {
+                                ref.child("userStats").child(currentUserId).setValue(new UserStats(currentUserId, Rank.getDefaultRank()));
+                            }
+                            playersRank[index] = Rank.getDefaultRank();
+                            status.set(index, true);
+                        } else {
+                            playersRank[index] = userStats.getRank();
+                            status.set(index, true);
+                        }
+
+                        if (!status.contains(false)) {
+                            Rank newUserRank = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank), winner);
+                            ref.child("userStats").child(currentUserId).child("rank").setValue(newUserRank);
+                            newQuote = newUserRank.computeRank();
+                            quoteByDate.add(new Tuple2<Long, Integer>());
+                            ref.child("players").child(currentUserId).child("quote").setValue(newUserRank.computeRank());
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
     }
 
     /**
      * Utility method checking if a counter exists for the received date and creates it if it
      * does not exist in the list.
      *
-     * @param time the date
+     * @param time
      */
     private void prepareLastBuckets(Long time) {
         long updateDate = getDay(time);
@@ -187,7 +258,7 @@ public class UserStats {
             playedByDate.add(new Tuple2<>(updateDate, 0));
             wonByDate.add(new Tuple2<>(updateDate, 0));
             if (quoteByDate.isEmpty()) {
-                quoteByDate.add(new Tuple2<>(updateDate, 0));
+                quoteByDate.add(new Tuple2<Long, Integer>(updateDate, 0));
             } else {
                 quoteByDate.add(new Tuple2<>(updateDate, quoteByDate.get(lastIndex).getValue()));
             }
@@ -195,7 +266,7 @@ public class UserStats {
     }
 
     /**
-     * Normalizes the date: We interested in tracking data day by day. Therefore we have to
+     * Normalizes the date: We interestad in tracking data day by day. Therefore we have to
      * make all hours and seconds the same in the same day. We settled for 23:59:59
      *
      * @param timestamp The time at the end of the match in milliseconds
@@ -211,33 +282,4 @@ public class UserStats {
         thisDate.set(Calendar.SECOND, 59);
         return thisDate.getTimeInMillis();
     }
-
-    private List<Tuple2<String, Integer>> sortedStringIntMap(Map<String, Integer> map) {
-        LinkedList<Tuple2<String, Integer>> result = new LinkedList<>();
-        for (String k : map.keySet()) {
-            result.add(new Tuple2<>(k, map.get(k)));
-        }
-        Collections.sort(result, new Comparator<Tuple2<String, Integer>>() {
-            @Override
-            public int compare(Tuple2<String, Integer> o1, Tuple2<String, Integer> o2) {
-                if (o1.getValue() > o2.getValue()) return -1;
-                else if (o1.getValue() < o2.getValue()) return 1;
-                else return 0;
-            }
-        });
-        return result;
-    }
-
-    public List<Tuple2<String, Integer>> sortedPartners() {
-        return sortedStringIntMap(partners);
-    }
-
-    public List<Tuple2<String, Integer>> sortedVariants() {
-        return sortedStringIntMap(variants);
-    }
-
-    public List<Tuple2<String, Integer>> sortedWonWith() {
-        return sortedStringIntMap(wonWith);
-    }
-
 }

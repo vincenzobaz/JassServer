@@ -54,7 +54,7 @@ public class Rank {
         return standardDeviation;
     }
 
-    public int getRank() {
+    public int computeRank() {
         return (int) Math.ceil((mean - 3 * standardDeviation) * 10 + 1000);
     }
 
