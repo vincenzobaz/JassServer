@@ -217,7 +217,14 @@ public class UserStats {
         String currentUserId = playerId.toString();
         int index = 0;
 
-        int winner = ms.getWinnerIndex();
+        int winner;
+
+        if(teams.get("Team0").contains(currentUserId)) {
+            winner = ms.getWinnerIndex();
+        } else {
+            winner = (ms.getWinnerIndex() + 1) % 2;
+        }
+
         sciper[0] = currentUserId;
         getRankFromServer(currentUserId, sciper, playersRank, winner, currentUserId, index, status);
 
