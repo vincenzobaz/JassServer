@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 class MatchListener implements ChildEventListener {
     private final Map<String, Match> matches;
-    private final Map<String, Boolean> fullNotified;
+    private final Map<String, Boolean> shoudNotifyfull;
     private final Timer timer;
     private final Gson gson;
     private final Jedis jedis;
@@ -29,7 +29,7 @@ class MatchListener implements ChildEventListener {
         this.timer = new Timer(true);
         this.gson = new Gson();
         this.jedis = new Jedis(Main.REDIS_URL);
-        this.fullNotified = new HashMap<>();
+        this.shoudNotifyfull = new HashMap<>();
     }
 
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -53,9 +53,9 @@ class MatchListener implements ChildEventListener {
         List<Player> newPlayers = newMatch.getPlayers();
         List<Player> oldPlayers = oldMatch.getPlayers();
 
-        if (newPlayers.size() == newMatch.getMaxPlayerNumber() && fullNotified.getOrDefault(matchId, false)) {
+        if (newPlayers.size() == newMatch.getMaxPlayerNumber() && shoudNotifyfull.getOrDefault(matchId, true)) {
             notifyFull(matchId, newPlayers);
-            fullNotified.put(matchId, true);
+            shoudNotifyfull.put(matchId, false);
         } else if (newPlayers.size() == oldPlayers.size() + 1) {
             Player lastArrived = newPlayers.get(oldPlayers.size());
             notifyJoinMatch(lastArrived.getID().toString(), oldMatch.getMatchID(), oldPlayers);
