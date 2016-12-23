@@ -101,7 +101,6 @@ public class StatsBufferListener implements ChildEventListener {
                 stats = new UserStats(id);
             }
             stats.update(matchResult);
-		 Main.logger.info("IN AFTER UPDATE");
 
             updateUserStats(stats, stats.getPlayerId().toString());
         }
