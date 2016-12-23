@@ -68,7 +68,6 @@ class MatchListener implements ChildEventListener {
     }
 
     private List<String> collectScipers(List<Player> players) {
-        List<String> res = new ArrayList<>(players.size());
         return players.stream().map(p -> p.getID().toString()).collect(Collectors.toList());
     }
 
