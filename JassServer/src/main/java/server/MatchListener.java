@@ -16,19 +16,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 class MatchListener implements ChildEventListener {
-    private Map<String, Match> matches;
+    private final Map<String, Match> matches;
+    private final Map<String, Boolean> fullNotified;
     private final Timer timer;
     private final Gson gson;
-    private Jedis jedis;
+    private final Jedis jedis;
 
     MatchListener() {
         Unirest.setDefaultHeader("Content-Type", "application/json");
         Unirest.setDefaultHeader("Authorization", Main.FCM_KEY);
-        this.jedis = new Jedis("redis");
         this.matches = new HashMap<>();
         this.timer = new Timer(true);
-        gson = new Gson();
-        jedis = new Jedis(Main.REDIS_URL);
+        this.gson = new Gson();
+        this.jedis = new Jedis(Main.REDIS_URL);
+        this.fullNotified = new HashMap<>();
     }
 
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -52,8 +53,9 @@ class MatchListener implements ChildEventListener {
         List<Player> newPlayers = newMatch.getPlayers();
         List<Player> oldPlayers = oldMatch.getPlayers();
 
-        if (newPlayers.size() == newMatch.getMaxPlayerNumber()) {
+        if (newPlayers.size() == newMatch.getMaxPlayerNumber() && fullNotified.getOrDefault(matchId, false)) {
             notifyFull(matchId, newPlayers);
+            fullNotified.put(matchId, true);
         } else if (newPlayers.size() == oldPlayers.size() + 1) {
             Player lastArrived = newPlayers.get(oldPlayers.size());
             notifyJoinMatch(lastArrived.getID().toString(), oldMatch.getMatchID(), oldPlayers);
