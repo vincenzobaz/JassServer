@@ -268,8 +268,8 @@ public class UserStats {
                         if (!status.contains(false)) {
                             Rank newUserRank = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank), winner);
                             Rank newUserRank1 = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank[1], playersRank[0], playersRank[2], playersRank[3]), winner);
-                            Rank newUserRank2 = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank[2], playersRank[3], playersRank[0], playersRank[1]), winner);
-                            Rank newUserRank3 = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank[3], playersRank[2], playersRank[0], playersRank[1]), winner);
+                            Rank newUserRank2 = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank[2], playersRank[3], playersRank[0], playersRank[1]), (winner + 1) % 2);
+                            Rank newUserRank3 = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank[3], playersRank[2], playersRank[0], playersRank[1]), (winner + 1) % 2);
 
                             ref.child("userStats").child(currentUserId).child("rank").setValue(newUserRank);
                             newQuote = newUserRank.computeRank();
