@@ -28,7 +28,7 @@ import stats.trueskill.SkillCalculator;
 /**
  * @author vincenzobaz
  *         <p>
- *         This class serves as a container for the statistics concerning one {@link ch.epfl.sweng.jassatepfl.model.Player}
+ *         This class serves as a container for the statistics concerning one {ch.epfl.sweng.jassatepfl.model.Player}
  *         player. The tracked information are class fields and are documented below.
  */
 public class UserStats {
@@ -165,7 +165,7 @@ public class UserStats {
     public UserStats update(MatchStats stats) {
         prepareLastBuckets(Calendar.getInstance().getTimeInMillis());
 
-        updateQuote(stats);
+        if(stats.getMatch().createdBy().getID().toString().equals(playerId.toString())) updateQuote(stats);
 
         partners.remove("SENTINEL");
         variants.remove("SENTINEL");
@@ -211,20 +211,23 @@ public class UserStats {
 
     protected void updateQuote(MatchStats ms) {
         Map<String, List<String>> teams = ms.getMatch().getTeams();
+        final String[] sciper = new String[4];
         final Rank[] playersRank = new Rank[4];
         final List<Boolean> status = Arrays.asList(false, false, false, false);
         String currentUserId = playerId.toString();
         int index = 0;
 
         int winner = ms.getWinnerIndex();
-        getRankFromServer(currentUserId, playersRank, winner, currentUserId, index, status);
+        sciper[0] = currentUserId;
+        getRankFromServer(currentUserId, sciper, playersRank, winner, currentUserId, index, status);
 
         for (List<String> team : teams.values()) {
             if (team.contains(currentUserId)) {
                 for (String id : team) {
                     if (!id.equals(currentUserId)) {
                         ++index;
-                        getRankFromServer(id, playersRank, winner, currentUserId, index, status);
+                        sciper[index] = id;
+                        getRankFromServer(id, sciper, playersRank, winner, currentUserId, index, status);
                     }
                 }
             }
@@ -234,14 +237,15 @@ public class UserStats {
             if (!team.contains(currentUserId)) {
                 for (String id : team) {
                     ++index;
-                    getRankFromServer(id, playersRank, winner, currentUserId, index, status);
+                    sciper[index] = id;
+                    getRankFromServer(id, sciper, playersRank, winner, currentUserId, index, status);
                 }
 
             }
         }
     }
 
-    private void getRankFromServer(String playerId, final Rank[] playersRank, final int winner, final String currentUserId, final int index, final List<Boolean> status) {
+    private void getRankFromServer(String playerId, final String [] sciper, final Rank[] playersRank, final int winner, final String currentUserId, final int index, final List<Boolean> status) {
         FirebaseDatabase.getInstance().getReference()
                 .child("userStats").child(playerId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -263,10 +267,26 @@ public class UserStats {
 
                         if (!status.contains(false)) {
                             Rank newUserRank = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank), winner);
+                            Rank newUserRank1 = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank[1], playersRank[0], playersRank[2], playersRank[3]), winner);
+                            Rank newUserRank2 = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank[2], playersRank[3], playersRank[0], playersRank[1]), winner);
+                            Rank newUserRank3 = SkillCalculator.calculateNewRatings(GameInfo.getDefaultGameInfo(), Arrays.asList(playersRank[3], playersRank[2], playersRank[0], playersRank[1]), winner);
+
                             ref.child("userStats").child(currentUserId).child("rank").setValue(newUserRank);
                             newQuote = newUserRank.computeRank();
-                            quoteByDate.add(new Tuple2<Long, Integer>());
+                            quoteByDate.add(new Tuple2<>());
                             ref.child("players").child(currentUserId).child("quote").setValue(newUserRank.computeRank());
+
+                            ref.child("userStats").child(sciper[1]).child("rank").setValue(newUserRank1);
+                            newQuote = newUserRank.computeRank();
+                            ref.child("players").child(sciper[1]).child("quote").setValue(newUserRank1.computeRank());
+
+                            ref.child("userStats").child(sciper[2]).child("rank").setValue(newUserRank2);
+                            newQuote = newUserRank.computeRank();
+                            ref.child("players").child(sciper[2]).child("quote").setValue(newUserRank2.computeRank());
+
+                            ref.child("userStats").child(sciper[3]).child("rank").setValue(newUserRank3);
+                            newQuote = newUserRank.computeRank();
+                            ref.child("players").child(sciper[3]).child("quote").setValue(newUserRank3.computeRank());
                         }
                     }
 
