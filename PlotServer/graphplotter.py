@@ -63,7 +63,7 @@ def create_bar_graph(json_dict):
     ax.bar(y_pos, counters, align='center', color='#99ccff', linewidth=0)
     ax.set_xticks(y_pos)
     ax.set_yticks(np.arange(max(counters) + 2))
-    ax.set_xticklabels(labels, orientation='vertical')
+    ax.set_xticklabels(labels)
     ax.set_ylabel(ylabel)
     ax.set_xlabel(xlabel)
     
@@ -93,7 +93,7 @@ def create_time_graph(json_dict):
     ax.plot(y_pos, ints, color='r', marker='o')
     ax.set_xticks(y_pos)
     ax.set_yticks(np.arange(0, max(ints) + 2))
-    ax.set_xticklabels([datetime.date.fromtimestamp(t // 1000) for t in dates], orientation='vertical')
+    ax.set_xticklabels([datetime.date.fromtimestamp(t // 1000) for t in dates])
     ax.set_ylabel(ylabel)
     ax.set_xlabel(xlabel)
 
